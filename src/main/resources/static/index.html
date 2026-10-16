@@ -114,8 +114,8 @@
         <div class="modal-card">
             <div class="modal-header">
                 <div class="modal-title-area">
-                    <span class="modal-tag">PROTOCOLO DE CONTENCIÓN</span>
-                    <h2 class="modal-title">REGISTRAR NUEVA BIOARMA</h2>
+                    <span class="modal-tag" id="modal-tag">PROTOCOLO DE CONTENCIÓN</span>
+                    <h2 class="modal-title" id="modal-title">REGISTRAR NUEVA BIOARMA</h2>
                 </div>
                 <button class="close-modal-btn" id="close-modal-btn" aria-label="Cerrar modal">&times;</button>
             </div>
@@ -150,28 +150,12 @@
                     <input type="text" id="monster-weakness" placeholder="Ej: Nitrógeno líquido, Lanzagranadas...">
                 </div>
 
+                <input type="hidden" id="monster-id">
                 <div class="modal-actions">
                     <button type="button" class="re-btn re-btn-outline" id="cancel-modal-btn">CANCELAR</button>
-                    <button type="submit" class="re-btn re-btn-primary">GUARDAR REGISTRO</button>
+                    <button type="submit" class="re-btn re-btn-primary" id="submit-modal-btn">GUARDAR REGISTRO</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Modal de Expediente / Galería Detallada -->
-    <div id="detail-modal" class="re-modal hidden">
-        <div class="modal-backdrop"></div>
-        <div class="modal-card detail-card">
-            <div class="modal-header">
-                <div>
-                    <span class="modal-tag">EXPEDIENTE CONFIDENCIAL UMBRELLA</span>
-                    <h2 id="detail-title" class="modal-title">ESPÉCIMEN</h2>
-                </div>
-                <button class="close-modal-btn" id="close-detail-btn">&times;</button>
-            </div>
-            <div class="detail-body" id="detail-body">
-                <!-- Se llena dinámicamente -->
-            </div>
         </div>
     </div>
 

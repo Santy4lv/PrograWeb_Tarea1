@@ -655,6 +655,12 @@ body {
     color: var(--umbrella-white);
 }
 
+.card-btn-edit:hover {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: var(--hazard-yellow);
+    color: #fbbf24;
+}
+
 .card-btn-delete:hover {
     background: rgba(220, 38, 38, 0.2);
     border-color: #ef4444;
