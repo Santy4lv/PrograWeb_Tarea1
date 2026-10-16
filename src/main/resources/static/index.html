@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umbrella Corporation // B.O.W. Database</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Overlay de efecto CRT / Scanline -->
+    <div class="crt-overlay" aria-hidden="true"></div>
+
+    <header class="re-header">
+        <div class="header-content">
+            <div class="logo-area">
+                <svg class="umbrella-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Umbrella Corporation Logo">
+                    <circle cx="50" cy="50" r="46" stroke="#e60026" stroke-width="3" opacity="0.8"/>
+                    <!-- Octágono Umbrella (alternancia rojo y blanco) -->
+                    <path d="M50 50 L50 8 A42 42 0 0 1 79.7 20.3 Z" fill="#e60026"/>
+                    <path d="M50 50 L79.7 20.3 A42 42 0 0 1 92 50 Z" fill="#ffffff"/>
+                    <path d="M50 50 L92 50 A42 42 0 0 1 79.7 79.7 Z" fill="#e60026"/>
+                    <path d="M50 50 L79.7 79.7 A42 42 0 0 1 50 92 Z" fill="#ffffff"/>
+                    <path d="M50 50 L50 92 A42 42 0 0 1 20.3 79.7 Z" fill="#e60026"/>
+                    <path d="M50 50 L20.3 79.7 A42 42 0 0 1 8 50 Z" fill="#ffffff"/>
+                    <path d="M50 50 L8 50 A42 42 0 0 1 20.3 20.3 Z" fill="#e60026"/>
+                    <path d="M50 50 L20.3 20.3 A42 42 0 0 1 50 8 Z" fill="#ffffff"/>
+                    <circle cx="50" cy="50" r="14" fill="#0b0f14" stroke="#e60026" stroke-width="2"/>
+                </svg>
+                <div class="title-group">
+                    <div class="classified-tag">NIVEL DE SEGURIDAD 4 // ALTO SECRETO</div>
+                    <h1 class="main-title">UMBRELLA ARCHIVES</h1>
+                    <p class="subtitle">Base de Datos de Bioarmas y Especímenes (B.O.W.)</p>
+                </div>
+            </div>
+
+            <div class="header-status">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text" id="connection-status">SISTEMA CONECTADO</span>
+                </div>
+                <div class="security-code">LAB: ARKLAY // RESIDENT EVIL</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Barra de herramientas: Búsqueda y Filtros -->
+        <section class="toolbar-section">
+            <div class="search-and-actions">
+                <!-- Barra de búsqueda con lupa a la derecha -->
+                <div class="search-wrapper">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        class="search-input" 
+                        placeholder="Buscar por espécimen, cepa de virus, juego o debilidad..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <button id="search-btn" class="search-btn" title="Buscar espécimen" aria-label="Buscar">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                    <button id="clear-search-btn" class="clear-btn hidden" title="Limpiar búsqueda" aria-label="Limpiar búsqueda">✕</button>
+                </div>
+
+                <!-- Botón para registrar nuevo espécimen -->
+                <button id="open-modal-btn" class="re-btn re-btn-primary">
+                    <span class="btn-icon">+</span> NUEVO ESPÉCIMEN
+                </button>
+            </div>
+
+            <!-- Barra de estadísticas y filtros rápidos -->
+            <div class="filter-bar">
+                <div class="counter-badge">
+                    MOSTRANDO: <strong id="specimens-count">0</strong> ESPÉCIMENES
+                </div>
+                <div class="quick-filters" id="quick-filters">
+                    <button class="filter-chip active" data-filter="all">TODOS</button>
+                    <button class="filter-chip" data-filter="T-Virus">T-VIRUS</button>
+                    <button class="filter-chip" data-filter="Las Plagas">LAS PLAGAS</button>
+                    <button class="filter-chip" data-filter="NE-Alpha">NE-ALPHA</button>
+                    <button class="filter-chip" data-filter="high-threat">PELIGRO CRÍTICO (≥7)</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contenedor GRID de tarjetas (Responsivo mediante Media Queries) -->
+        <section class="gallery-section">
+            <div id="monsters-grid" class="cards-grid">
+                <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+            </div>
+
+            <!-- Estado vacío cuando no hay resultados de búsqueda -->
+            <div id="empty-state" class="empty-state hidden">
+                <div class="biohazard-warning-icon">☣</div>
+                <h3>NO SE ENCONTRARON ESPÉCIMENES</h3>
+                <p>No existen registros que coincidan con los parámetros de búsqueda ingresados.</p>
+                <button id="reset-search-btn" class="re-btn re-btn-outline">REINICIAR BÚSQUEDA</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para Agregar / Registrar Espécimen -->
+    <div id="monster-modal" class="re-modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <span class="modal-tag">PROTOCOLO DE CONTENCIÓN</span>
+                    <h2 class="modal-title">REGISTRAR NUEVA BIOARMA</h2>
+                </div>
+                <button class="close-modal-btn" id="close-modal-btn" aria-label="Cerrar modal">&times;</button>
+            </div>
+
+            <form id="monster-form" class="re-form">
+                <div class="form-group">
+                    <label for="monster-name">NOMBRE DEL ESPÉCIMEN *</label>
+                    <input type="text" id="monster-name" required placeholder="Ej: Tyrant T-002, Licker, Hunter...">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="monster-virus">CEPA VIRAL / PATÓGENO *</label>
+                        <input type="text" id="monster-virus" required placeholder="Ej: T-Virus, G-Virus, Las Plagas...">
+                    </div>
+                    <div class="form-group">
+                        <label for="monster-game">APARICIÓN (JUEGO) *</label>
+                        <input type="text" id="monster-game" required placeholder="Ej: Resident Evil 2...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="monster-danger">NIVEL DE AMENAZA (1 - 10) *</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="monster-danger" min="1" max="10" value="5" step="1">
+                        <span id="danger-value" class="danger-preview level-5">5 / 10</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="monster-weakness">PUNTOS DÉBILES / CONTRAMEDIDAS</label>
+                    <input type="text" id="monster-weakness" placeholder="Ej: Nitrógeno líquido, Lanzagranadas...">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="re-btn re-btn-outline" id="cancel-modal-btn">CANCELAR</button>
+                    <button type="submit" class="re-btn re-btn-primary">GUARDAR REGISTRO</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Expediente / Galería Detallada -->
+    <div id="detail-modal" class="re-modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card detail-card">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-tag">EXPEDIENTE CONFIDENCIAL UMBRELLA</span>
+                    <h2 id="detail-title" class="modal-title">ESPÉCIMEN</h2>
+                </div>
+                <button class="close-modal-btn" id="close-detail-btn">&times;</button>
+            </div>
+            <div class="detail-body" id="detail-body">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Alertas Toast tipo Terminal -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <footer class="re-footer">
+        <p>UMBRELLA CORP // BIOLOGICAL WEAPONS DIVISION // ESTRICTAMENTE CONFIDENCIAL &copy; R.P.D. ARCHIVES</p>
+    </footer>
+
+    <!-- Script JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

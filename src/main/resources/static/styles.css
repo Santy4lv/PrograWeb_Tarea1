@@ -1,0 +1,952 @@
+/* ==========================================================================
+   RESIDENT EVIL // UMBRELLA ARCHIVES - THEME & GRID SYSTEM
+   ========================================================================== */
+
+:root {
+    --bg-primary: #0a0d12;
+    --bg-secondary: #111721;
+    --bg-card: #151e2b;
+    --bg-card-hover: #1b2637;
+    --bg-input: #0e141d;
+    
+    --umbrella-red: #e60026;
+    --umbrella-red-glow: rgba(230, 0, 38, 0.4);
+    --umbrella-red-subtle: rgba(230, 0, 38, 0.12);
+    --umbrella-white: #f5f6f8;
+    
+    --hazard-yellow: #f59e0b;
+    --hazard-green: #10b981;
+    --hazard-cyan: #06b6d4;
+    
+    --text-primary: #e2e8f0;
+    --text-muted: #8b9bb4;
+    --text-dim: #54657d;
+    
+    --border-color: #243246;
+    --border-focus: #e60026;
+    
+    --font-heading: 'Orbitron', -apple-system, sans-serif;
+    --font-body: 'Rajdhani', -apple-system, sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset y caja */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    background-image: 
+        radial-gradient(circle at 50% 0%, rgba(230, 0, 38, 0.08) 0%, transparent 60%),
+        linear-gradient(rgba(10, 13, 18, 0.95), rgba(10, 13, 18, 0.98)),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.2) 3px);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Efecto de líneas de escaneo CRT sutil */
+.crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    opacity: 0.5;
+}
+
+/* ==========================================================================
+   HEADER // UMBRELLA CORP BRANDING
+   ========================================================================== */
+.re-header {
+    background-color: var(--bg-secondary);
+    border-bottom: 2px solid var(--umbrella-red);
+    box-shadow: 0 4px 20px var(--umbrella-red-glow);
+    padding: 1.25rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.header-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.umbrella-logo {
+    width: 60px;
+    height: 60px;
+    filter: drop-shadow(0 0 8px var(--umbrella-red-glow));
+    animation: pulseLogo 4s infinite ease-in-out;
+}
+
+@keyframes pulseLogo {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px var(--umbrella-red-glow)); }
+    50% { transform: scale(1.04); filter: drop-shadow(0 0 16px var(--umbrella-red)); }
+}
+
+.classified-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--umbrella-red);
+    letter-spacing: 2px;
+    margin-bottom: 0.15rem;
+}
+
+.main-title {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: var(--umbrella-white);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.header-status {
+    text-align: right;
+    font-family: var(--font-mono);
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--hazard-green);
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+    background-color: var(--hazard-green);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--hazard-green);
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.security-code {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 0.2rem;
+}
+
+/* ==========================================================================
+   CONTAINER & TOOLBAR (SEARCH + FILTERS)
+   ========================================================================== */
+.container {
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem;
+    flex: 1;
+}
+
+.toolbar-section {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.search-and-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Barra de búsqueda con lupa a la derecha */
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.9rem 3.2rem 0.9rem 1.2rem; /* Espacio extra a la derecha para la lupa */
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    transition: var(--transition-fast);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--umbrella-red);
+    box-shadow: 0 0 12px var(--umbrella-red-glow), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.search-input::placeholder {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+}
+
+/* Lupa posicionada a la DERECHA */
+.search-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--umbrella-red);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: var(--transition-fast);
+}
+
+.search-btn:hover {
+    background: var(--umbrella-red-subtle);
+    color: #ff3355;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.search-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 44px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: var(--transition-fast);
+}
+
+.clear-btn:hover {
+    color: var(--text-primary);
+}
+
+/* Botones con estilo Resident Evil / Táctico */
+.re-btn {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 0.85rem 1.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.re-btn-primary {
+    background: linear-gradient(135deg, #b8001e, #e60026);
+    color: #ffffff;
+    border: 1px solid #ff3355;
+    box-shadow: 0 4px 15px var(--umbrella-red-glow);
+}
+
+.re-btn-primary:hover {
+    background: linear-gradient(135deg, #cc0022, #ff1a3c);
+    box-shadow: 0 6px 20px rgba(230, 0, 38, 0.6);
+    transform: translateY(-1px);
+}
+
+.re-btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1.5px solid var(--border-color);
+}
+
+.re-btn-outline:hover {
+    border-color: var(--umbrella-red);
+    color: var(--umbrella-red);
+    background: var(--umbrella-red-subtle);
+}
+
+/* Filtros rápidos y contador */
+.filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(17, 23, 33, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.counter-badge {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.counter-badge strong {
+    color: var(--umbrella-red);
+    font-size: 1.1rem;
+}
+
+.quick-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.filter-chip:hover, .filter-chip.active {
+    background: var(--umbrella-red-subtle);
+    border-color: var(--umbrella-red);
+    color: var(--umbrella-white);
+    box-shadow: 0 0 8px var(--umbrella-red-glow);
+}
+
+/* ==========================================================================
+   CSS GRID RESPONSIVO (MEDIA QUERIES REQUERIDAS)
+   - Teléfonos: 1 tarjeta por fila
+   - Tablets / Intermedio: 2 tarjetas por fila
+   - Vistas normales (1080p): 3 tarjetas por fila
+   - Pantallas más grandes: 4 tarjetas por fila
+   ========================================================================== */
+
+.cards-grid {
+    display: grid;
+    /* Móviles / Pantallas pequeñas por defecto: 1 tarjeta por fila */
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    width: 100%;
+}
+
+/* Tablet / Pantallas intermedias (≥ 640px) */
+@media (min-width: 640px) {
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Vistas normales / 1080p (≥ 1024px) -> 3 TARJETAS POR FILA */
+@media (min-width: 1024px) {
+    .cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Pantallas más grandes (≥ 1440px / Monitores Ultrawide o 2K/4K) -> 4 TARJETAS POR FILA */
+@media (min-width: 1440px) {
+    .cards-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ==========================================================================
+   DISEÑO DE LAS TARJETAS (REUTILIZABLE PARA GALERÍA CON IMÁGENES)
+   ========================================================================== */
+
+.monster-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: var(--transition-normal);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* Detalle táctico de esquinas / marco Umbrella */
+.monster-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--umbrella-red);
+    opacity: 0.6;
+    transition: var(--transition-fast);
+}
+
+.monster-card:hover {
+    transform: translateY(-5px);
+    background: var(--bg-card-hover);
+    border-color: rgba(230, 0, 38, 0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px var(--umbrella-red-glow);
+}
+
+.monster-card:hover::before {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--umbrella-red);
+}
+
+/* Encabezado Táctico de la Tarjeta (Solo Texto) */
+.card-header-bar {
+    padding: 1rem 1.25rem;
+    background: rgba(14, 20, 29, 0.85);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+/* Badge de nivel de amenaza en el encabezado de texto */
+.threat-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+}
+
+.threat-low {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid var(--hazard-green);
+    color: #34d399;
+}
+
+.threat-medium {
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid var(--hazard-yellow);
+    color: #fbbf24;
+}
+
+.threat-high {
+    background: rgba(230, 0, 38, 0.25);
+    border: 1px solid var(--umbrella-red);
+    color: #ff4d6d;
+    box-shadow: 0 0 10px var(--umbrella-red-glow);
+}
+
+.threat-extreme {
+    background: rgba(220, 38, 38, 0.35);
+    border: 1px solid #ff1a3c;
+    color: #ffffff;
+    animation: flashCritical 1.5s infinite;
+}
+
+@keyframes flashCritical {
+    0%, 100% { box-shadow: 0 0 6px rgba(255, 26, 60, 0.6); }
+    50% { box-shadow: 0 0 16px rgba(255, 26, 60, 1); }
+}
+
+/* Contenido de la tarjeta */
+.card-content {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.85rem;
+}
+
+.card-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.specimen-id {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--umbrella-red);
+    letter-spacing: 1px;
+}
+
+.specimen-game {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.specimen-name {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--umbrella-white);
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+/* Barra de nivel de peligro */
+.danger-meter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.danger-meter-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+}
+
+.danger-track {
+    height: 6px;
+    background: #090d14;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.danger-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ficha de datos / detalles */
+.details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+    background: rgba(14, 20, 29, 0.6);
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid rgba(36, 50, 70, 0.5);
+}
+
+.detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.detail-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    min-width: 75px;
+    text-transform: uppercase;
+}
+
+.detail-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.virus-pill {
+    background: var(--umbrella-red-subtle);
+    color: #ff6b81;
+    border: 1px solid rgba(230, 0, 38, 0.3);
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+}
+
+/* Pie de tarjeta: Botones de Acción */
+.card-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.card-btn {
+    flex: 1;
+    padding: 0.55rem;
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-align: center;
+}
+
+.card-btn:hover {
+    background: var(--umbrella-red-subtle);
+    border-color: var(--umbrella-red);
+    color: var(--umbrella-white);
+}
+
+.card-btn-delete:hover {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: #ef4444;
+    color: #fca5a5;
+}
+
+/* ==========================================================================
+   MODAL DE REGISTRO & DETALLE
+   ========================================================================== */
+
+.re-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1.5rem;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.re-modal.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 7, 10, 0.85);
+    backdrop-filter: blur(8px);
+}
+
+.modal-card {
+    position: relative;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--umbrella-red);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 25px var(--umbrella-red-glow);
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 10;
+    padding: 2rem;
+    animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlide {
+    from { transform: scale(0.92) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.modal-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--umbrella-red);
+    letter-spacing: 1.5px;
+}
+
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    color: var(--umbrella-white);
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.close-modal-btn:hover {
+    color: var(--umbrella-red);
+    transform: scale(1.15);
+}
+
+/* Formularios */
+.re-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 540px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.form-group input {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: var(--transition-fast);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--umbrella-red);
+    box-shadow: 0 0 8px var(--umbrella-red-glow);
+}
+
+.field-hint {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+/* Range input con vista previa */
+.range-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.range-wrapper input[type="range"] {
+    flex: 1;
+    accent-color: var(--umbrella-red);
+    cursor: pointer;
+}
+
+.danger-preview {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    min-width: 65px;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Expediente Detallado */
+.detail-card {
+    max-width: 700px;
+}
+
+.detail-view-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.detail-img-box {
+    width: 100%;
+    max-height: 320px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #000;
+}
+
+.detail-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* ==========================================================================
+   ESTADO VACÍO (EMPTY STATE)
+   ========================================================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.empty-state.hidden {
+    display: none;
+}
+
+.biohazard-warning-icon {
+    font-size: 4rem;
+    color: var(--umbrella-red);
+    margin-bottom: 1rem;
+    animation: pulseLogo 3s infinite;
+}
+
+.empty-state h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+/* ==========================================================================
+   TOAST NOTIFICATIONS (ESTILO TERMINAL RESIDENT EVIL)
+   ========================================================================== */
+
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.re-toast {
+    background: var(--bg-secondary);
+    border-left: 4px solid var(--umbrella-red);
+    border: 1px solid var(--border-color);
+    border-left-width: 4px;
+    border-left-color: var(--umbrella-red);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    padding: 0.85rem 1.25rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: toastIn 0.3s ease-out;
+}
+
+@keyframes toastIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.toast-success { border-left-color: var(--hazard-green); }
+.toast-error { border-left-color: var(--umbrella-red); }
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.re-footer {
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-top: auto;
+}

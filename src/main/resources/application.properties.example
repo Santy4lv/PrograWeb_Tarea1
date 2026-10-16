@@ -1,0 +1,7 @@
+spring.application.name=monsters
+spring.datasource.url=jdbc:postgresql://localhost:5432/resident_evil_db
+spring.datasource.username=postgres
+spring.datasource.password=TU_PASSWORD_AQUI
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+server.port=8080
