@@ -363,20 +363,38 @@ async function openPokemonModal(pokemon) {
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
-    // 2. Query ENDPOINT 2: /pokemon-species/{id}
+    // 2. Composite API JOIN Step 2: Query /pokemon-species/{id} using primary key pokemon.id
     try {
         const speciesData = await fetchSpeciesData(pokemon.id);
         renderSpeciesDetails(speciesData);
 
-        // 3. Query ENDPOINT 3: /evolution-chain/{id}
+        // 3. Composite API JOIN Step 3: Query /evolution-chain/{id} via foreign key speciesData.evolution_chain.url
+        let evoData = null;
         if (speciesData.evolution_chain?.url) {
-            const evoData = await fetchEvolutionChain(speciesData.evolution_chain.url);
+            evoData = await fetchEvolutionChain(speciesData.evolution_chain.url);
             renderEvolutionChain(evoData, pokemon.id);
         } else {
             modalEvolutionChain.innerHTML = '<div class="evo-loading">This specimen has no registered evolution line.</div>';
         }
+
+        // Informative logging for API JOIN pattern verification (Inspectable in browser DevTools Console)
+        console.groupCollapsed(`%c[REST API JOIN] Composite Specimen #${pokemon.id} - ${pokemon.name.toUpperCase()}`, 'color: #3b82f6; font-weight: bold;');
+        console.log('%c[Step 1 - Primary Endpoint]: GET /pokemon/%s', 'color: #10b981; font-weight: bold;', pokemon.id, {
+            id: pokemon.id,
+            name: pokemon.name,
+            types: pokemon.types.map(t => t.type.name),
+            stats: pokemon.stats.map(s => ({ stat: s.stat.name, value: s.base_stat }))
+        });
+        console.log('%c[Step 2 - Joined Relation]: GET /pokemon-species/%s (Joined on pokemon.id)', 'color: #f59e0b; font-weight: bold;', pokemon.id, {
+            genus: speciesData.genera?.find(g => g.language.name === 'en')?.genus,
+            habitat: speciesData.habitat?.name,
+            captureRate: speciesData.capture_rate,
+            evolutionChainForeignKey: speciesData.evolution_chain?.url
+        });
+        console.log('%c[Step 3 - Nested Joined Relation]: GET %s (Joined on evolution_chain.url)', 'color: #8b5cf6; font-weight: bold;', speciesData.evolution_chain?.url, evoData);
+        console.groupEnd();
     } catch (error) {
-        console.error('Error retrieving detailed PokeAPI data:', error);
+        console.error('Error retrieving detailed PokeAPI composite data:', error);
         modalDescription.textContent = 'Could not load detailed biological description from PokeAPI at this moment.';
         modalEvolutionChain.innerHTML = '<div class="evo-loading">Evolutionary information unavailable.</div>';
     }
