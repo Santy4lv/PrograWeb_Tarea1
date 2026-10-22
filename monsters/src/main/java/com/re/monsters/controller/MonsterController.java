@@ -21,31 +21,31 @@ public class MonsterController {
 
     // GET
     @GetMapping
-    public List<Monster> obtenerMonstruos() {
-        return service.listarTodos();
+    public List<Monster> getAllMonsters() {
+        return service.findAll();
     }
 
     // POST
     @PostMapping
-    public ResponseEntity<Monster> crearMonstruo(@RequestBody Monster monster) {
-        Monster guardado = service.guardar(monster);
-        return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+    public ResponseEntity<Monster> createMonster(@RequestBody Monster monster) {
+        Monster saved = service.save(monster);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // PUT: Nota el ("id") obligatorio
+    // PUT: Mandatory id path variable
     @PutMapping("/{id}")
-    public ResponseEntity<Monster> actualizarMonstruo(@PathVariable("id") Long id, @RequestBody Monster monster) {
-        Monster actualizado = service.actualizar(id, monster);
-        if (actualizado != null) {
-            return ResponseEntity.ok(actualizado);
+    public ResponseEntity<Monster> updateMonster(@PathVariable("id") Long id, @RequestBody Monster monster) {
+        Monster updated = service.update(id, monster);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
         }
         return ResponseEntity.notFound().build();
     }
 
-    // DELETE: Nota el ("id") obligatorio
+    // DELETE: Mandatory id path variable
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarMonstruo(@PathVariable("id") Long id) {
-        service.eliminar(id);
+    public ResponseEntity<Void> deleteMonster(@PathVariable("id") Long id) {
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
