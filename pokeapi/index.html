@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pokédex Avanzada - Aplicación Web interactiva que consume 3 endpoints de PokeAPI con diseño responsivo, imágenes en alta resolución y modal descriptivo.">
+    <title>Pokédex OS // PokeAPI Database</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="resources/css/styles.css">
+</head>
+<body>
+    <!-- Efecto sutil de escaneo CRT / Holograma -->
+    <div class="crt-overlay" aria-hidden="true"></div>
+
+    <!-- ENCABEZADO // POKÉDEX RESEARCH OS -->
+    <header class="pk-header">
+        <div class="header-content">
+            <div class="logo-area">
+                <div class="pokedex-orb-container" aria-hidden="true">
+                    <div class="pokedex-orb-main"></div>
+                    <div class="pokedex-orb-small red"></div>
+                    <div class="pokedex-orb-small yellow"></div>
+                    <div class="pokedex-orb-small green"></div>
+                </div>
+                <div class="title-group">
+                    <div class="classified-tag">SILPH CO. // BASE DE DATOS NACIONAL</div>
+                    <h1 class="main-title">POKÉDEX ARCHIVES</h1>
+                    <p class="subtitle">Catálogo de Especímenes y Análisis Biológico (PokeAPI v2)</p>
+                </div>
+            </div>
+
+            <div class="header-status">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text" id="connection-status">SISTEMA CONECTADO</span>
+                </div>
+                <div class="api-endpoints-pill" title="Endpoints de PokeAPI implementados">
+                    <span>⚡ 3 ENDPOINTS: /pokemon &bull; /pokemon-species &bull; /evolution-chain</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- BARRA DE HERRAMIENTAS: Búsqueda y Filtros Rápidos -->
+        <section class="toolbar-section">
+            <div class="search-and-actions">
+                <!-- Barra de búsqueda con lupa a la derecha -->
+                <div class="search-wrapper">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        class="search-input" 
+                        placeholder="Buscar por nombre (ej: Charizard, Gengar) o número (#025)..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <button id="search-btn" class="search-btn" title="Buscar espécimen" aria-label="Buscar">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                    <button id="clear-search-btn" class="clear-btn hidden" title="Limpiar búsqueda" aria-label="Limpiar búsqueda">✕</button>
+                </div>
+
+                <div class="generation-select-wrapper">
+                    <label for="gen-filter" class="visually-hidden">Generación</label>
+                    <select id="gen-filter" class="pk-select" aria-label="Filtrar por generación">
+                        <option value="1">Gen I (Kanto 1-151)</option>
+                        <option value="2">Gen II (Johto 152-251)</option>
+                        <option value="3">Gen III (Hoenn 252-386)</option>
+                        <option value="4">Gen IV (Sinnoh 387-493)</option>
+                        <option value="all">Todas las Regiones</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Contador de especímenes y chips de filtrado por Tipo -->
+            <div class="filter-bar">
+                <div class="counter-badge">
+                    MOSTRANDO: <strong id="specimens-count">0</strong> ESPECÍMENES
+                </div>
+                <div class="quick-filters" id="type-filters">
+                    <button class="filter-chip active" data-type="all">TODOS</button>
+                    <button class="filter-chip chip-fire" data-type="fire">FUEGO</button>
+                    <button class="filter-chip chip-water" data-type="water">AGUA</button>
+                    <button class="filter-chip chip-grass" data-type="grass">PLANTA</button>
+                    <button class="filter-chip chip-electric" data-type="electric">ELÉCTRICO</button>
+                    <button class="filter-chip chip-psychic" data-type="psychic">PSÍQUICO</button>
+                    <button class="filter-chip chip-dragon" data-type="dragon">DRAGÓN</button>
+                    <button class="filter-chip chip-ghost" data-type="ghost">FANTASMA</button>
+                    <button class="filter-chip chip-fighting" data-type="fighting">LUCHA</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTENEDOR GRID DE TARJETAS (Responsivo mediante Media Queries idénticas a Tarea 1) -->
+        <section class="gallery-section">
+            <div id="pokemon-grid" class="cards-grid">
+                <!-- Tarjetas generadas dinámicamente con JavaScript -->
+            </div>
+
+            <!-- Spinner de carga -->
+            <div id="loading-spinner" class="loading-state">
+                <div class="pokeball-spinner" aria-hidden="true"></div>
+                <p>Consultando base de datos de PokeAPI...</p>
+            </div>
+
+            <!-- Estado vacío cuando no hay resultados -->
+            <div id="empty-state" class="empty-state hidden">
+                <div class="empty-icon">🔍</div>
+                <h3>NO SE ENCONTRARON ESPECÍMENES</h3>
+                <p>No existen registros en la base de datos que coincidan con la búsqueda.</p>
+                <button id="reset-search-btn" class="pk-btn pk-btn-outline">REINICIAR BÚSQUEDA</button>
+            </div>
+
+            <!-- Botón para Cargar Más Pokémon -->
+            <div class="load-more-container" id="load-more-container">
+                <button id="load-more-btn" class="pk-btn pk-btn-primary">
+                    CARGAR MÁS POKÉMON (+24)
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL / POPUP DESCRIPTIVO DETALLADO (Al hacer click en cada tarjeta) -->
+    <div id="pokemon-modal" class="pk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-pokemon-name">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-specimen-id" id="modal-pokemon-id">#000</span>
+                    <h2 class="modal-title" id="modal-pokemon-name">NOMBRE DEL POKÉMON</h2>
+                    <span class="modal-genus-tag" id="modal-pokemon-genus">Categoría</span>
+                </div>
+                <button class="modal-close-btn" id="modal-close-btn" aria-label="Cerrar ventana emergente">&times;</button>
+            </div>
+
+            <div class="modal-body" id="modal-body">
+                <!-- Columna Izquierda: Imagen, Audio y Estadísticas Físicas -->
+                <div class="modal-col-visual">
+                    <div class="modal-image-wrapper">
+                        <div class="modal-glow-bg" id="modal-glow"></div>
+                        <img id="modal-pokemon-img" class="modal-main-img" src="" alt="Ilustración oficial del espécimen">
+                    </div>
+
+                    <div class="modal-audio-bar">
+                        <button id="play-cry-btn" class="pk-btn-audio" title="Reproducir rugido oficial">
+                            <span class="audio-icon">🔊</span> ESCUCHAR RUGIDO
+                        </button>
+                        <audio id="pokemon-cry-audio" preload="none"></audio>
+                    </div>
+
+                    <div class="physical-stats-card">
+                        <div class="phys-item">
+                            <span class="phys-label">ALTURA</span>
+                            <strong class="phys-value" id="modal-height">-- m</strong>
+                        </div>
+                        <div class="phys-item">
+                            <span class="phys-label">PESO</span>
+                            <strong class="phys-value" id="modal-weight">-- kg</strong>
+                        </div>
+                        <div class="phys-item">
+                            <span class="phys-label">HÁBITAT</span>
+                            <strong class="phys-value" id="modal-habitat">--</strong>
+                        </div>
+                        <div class="phys-item">
+                            <span class="phys-label">RATIO CAPTURA</span>
+                            <strong class="phys-value" id="modal-capture-rate">--</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Lore en Español, Tipos, Estadísticas Base y Cadena Evolutiva -->
+                <div class="modal-col-details">
+                    <!-- Tipos -->
+                    <div class="modal-section">
+                        <h4 class="section-heading">TIPO(S) ELEMENTAL(ES)</h4>
+                        <div class="types-container" id="modal-types"></div>
+                    </div>
+
+                    <!-- Descripción Oficial / Lore (Endpoint 2: /pokemon-species) -->
+                    <div class="modal-section">
+                        <h4 class="section-heading">
+                            <span>REGISTRO DE LA POKÉDEX (ESPAÑOL)</span>
+                            <span class="endpoint-badge">/pokemon-species</span>
+                        </h4>
+                        <blockquote class="pokedex-lore" id="modal-description">
+                            Cargando descripción biológica oficial...
+                        </blockquote>
+                    </div>
+
+                    <!-- Estadísticas Base (Endpoint 1: /pokemon) -->
+                    <div class="modal-section">
+                        <h4 class="section-heading">
+                            <span>ESTADÍSTICAS BASE DE COMBATE</span>
+                            <span class="endpoint-badge">/pokemon</span>
+                        </h4>
+                        <div class="stats-bars-grid" id="modal-stats-grid">
+                            <!-- Inyectado por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Cadena Evolutiva (Endpoint 3: /evolution-chain) -->
+                    <div class="modal-section">
+                        <h4 class="section-heading">
+                            <span>LÍNEA EVOLUTIVA COMPLETA</span>
+                            <span class="endpoint-badge">/evolution-chain</span>
+                        </h4>
+                        <div class="evolution-chain-container" id="modal-evolution-chain">
+                            <div class="evo-loading">Consultando cadena evolutiva...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer del Modal con información de la API -->
+            <div class="modal-footer">
+                <span class="footer-note">⚡ Proyecto Tarea 1 // Consumo de 3 Endpoints REST de PokeAPI</span>
+                <button class="pk-btn pk-btn-outline" id="modal-footer-close-btn">CERRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="pk-footer">
+        <div class="footer-content">
+            <p><strong>Pokédex Archives</strong> &bull; Programación Web - Tarea 1</p>
+            <p class="api-note">Datos consumidos en tiempo real desde <a href="https://pokeapi.co/" target="_blank" rel="noopener noreferrer">PokeAPI v2</a>.</p>
+        </div>
+    </footer>
+
+    <!-- Script principal -->
+    <script src="resources/js/script.js"></script>
+</body>
+</html>
