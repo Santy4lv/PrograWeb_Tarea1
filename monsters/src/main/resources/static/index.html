@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Overlay de efecto CRT / Scanline -->
+    <!-- CRT / Scanline Effect Overlay -->
     <div class="crt-overlay" aria-hidden="true"></div>
 
     <header class="re-header">
@@ -20,7 +20,7 @@
             <div class="logo-area">
                 <svg class="umbrella-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Umbrella Corporation Logo">
                     <circle cx="50" cy="50" r="46" stroke="#e60026" stroke-width="3" opacity="0.8"/>
-                    <!-- Octágono Umbrella (alternancia rojo y blanco) -->
+                    <!-- Umbrella Octagon -->
                     <path d="M50 50 L50 8 A42 42 0 0 1 79.7 20.3 Z" fill="#e60026"/>
                     <path d="M50 50 L79.7 20.3 A42 42 0 0 1 92 50 Z" fill="#ffffff"/>
                     <path d="M50 50 L92 50 A42 42 0 0 1 79.7 79.7 Z" fill="#e60026"/>
@@ -32,16 +32,16 @@
                     <circle cx="50" cy="50" r="14" fill="#0b0f14" stroke="#e60026" stroke-width="2"/>
                 </svg>
                 <div class="title-group">
-                    <div class="classified-tag">NIVEL DE SEGURIDAD 4 // ALTO SECRETO</div>
+                    <div class="classified-tag">SECURITY CLEARANCE LEVEL 4 // TOP SECRET</div>
                     <h1 class="main-title">UMBRELLA ARCHIVES</h1>
-                    <p class="subtitle">Base de Datos de Bioarmas y Especímenes (B.O.W.)</p>
+                    <p class="subtitle">Bio-Organic Weapon & Specimen Database (B.O.W.)</p>
                 </div>
             </div>
 
             <div class="header-status">
                 <div class="status-indicator">
                     <span class="status-dot"></span>
-                    <span class="status-text" id="connection-status">SISTEMA CONECTADO</span>
+                    <span class="status-text" id="connection-status">SYSTEM ONLINE</span>
                 </div>
                 <div class="security-code">LAB: ARKLAY // RESIDENT EVIL</div>
             </div>
@@ -49,96 +49,94 @@
     </header>
 
     <main class="container">
-        <!-- Barra de herramientas: Búsqueda y Filtros -->
+        <!-- Toolbar: Search and Filters -->
         <section class="toolbar-section">
             <div class="search-and-actions">
-                <!-- Barra de búsqueda con lupa a la derecha -->
                 <div class="search-wrapper">
                     <input 
                         type="text" 
                         id="search-input" 
                         class="search-input" 
-                        placeholder="Buscar por espécimen, cepa de virus, juego o debilidad..."
+                        placeholder="Search specimen, virus strain, game or weakness..."
                         autocomplete="off"
                         spellcheck="false"
                     >
-                    <button id="search-btn" class="search-btn" title="Buscar espécimen" aria-label="Buscar">
+                    <button id="search-btn" class="search-btn" title="Search specimen" aria-label="Search">
                         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
                     </button>
-                    <button id="clear-search-btn" class="clear-btn hidden" title="Limpiar búsqueda" aria-label="Limpiar búsqueda">✕</button>
+                    <button id="clear-search-btn" class="clear-btn hidden" title="Clear search" aria-label="Clear search">✕</button>
                 </div>
 
-                <!-- Botón para registrar nuevo espécimen -->
                 <button id="open-modal-btn" class="re-btn re-btn-primary">
-                    <span class="btn-icon">+</span> NUEVO ESPÉCIMEN
+                    <span class="btn-icon">+</span> NEW SPECIMEN
                 </button>
             </div>
 
-            <!-- Barra de estadísticas y filtros rápidos -->
+            <!-- Stats bar and quick filters -->
             <div class="filter-bar">
                 <div class="counter-badge">
-                    MOSTRANDO: <strong id="specimens-count">0</strong> ESPÉCIMENES
+                    DISPLAYING: <strong id="specimens-count">0</strong> SPECIMENS
                 </div>
                 <div class="quick-filters" id="quick-filters">
-                    <button class="filter-chip active" data-filter="all">TODOS</button>
+                    <button class="filter-chip active" data-filter="all">ALL</button>
                     <button class="filter-chip" data-filter="T-Virus">T-VIRUS</button>
                     <button class="filter-chip" data-filter="Las Plagas">LAS PLAGAS</button>
                     <button class="filter-chip" data-filter="NE-Alpha">NE-ALPHA</button>
-                    <button class="filter-chip" data-filter="high-threat">PELIGRO CRÍTICO (≥7)</button>
+                    <button class="filter-chip" data-filter="high-threat">CRITICAL THREAT (≥7)</button>
                 </div>
             </div>
         </section>
 
-        <!-- Contenedor GRID de tarjetas (Responsivo mediante Media Queries) -->
+        <!-- Cards Grid Container -->
         <section class="gallery-section">
             <div id="monsters-grid" class="cards-grid">
-                <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+                <!-- Cards generated dynamically via JavaScript -->
             </div>
 
-            <!-- Estado vacío cuando no hay resultados de búsqueda -->
+            <!-- Empty state -->
             <div id="empty-state" class="empty-state hidden">
                 <div class="biohazard-warning-icon">☣</div>
-                <h3>NO SE ENCONTRARON ESPÉCIMENES</h3>
-                <p>No existen registros que coincidan con los parámetros de búsqueda ingresados.</p>
-                <button id="reset-search-btn" class="re-btn re-btn-outline">REINICIAR BÚSQUEDA</button>
+                <h3>NO SPECIMENS FOUND</h3>
+                <p>No records match the requested search parameters.</p>
+                <button id="reset-search-btn" class="re-btn re-btn-outline">RESET SEARCH</button>
             </div>
         </section>
     </main>
 
-    <!-- Modal para Agregar / Registrar Espécimen -->
+    <!-- Modal for Adding / Editing Specimen -->
     <div id="monster-modal" class="re-modal hidden">
         <div class="modal-backdrop"></div>
         <div class="modal-card">
             <div class="modal-header">
                 <div class="modal-title-area">
-                    <span class="modal-tag" id="modal-tag">PROTOCOLO DE CONTENCIÓN</span>
-                    <h2 class="modal-title" id="modal-title">REGISTRAR NUEVA BIOARMA</h2>
+                    <span class="modal-tag" id="modal-tag">CONTAINMENT PROTOCOL</span>
+                    <h2 class="modal-title" id="modal-title">REGISTER NEW BIOWEAPON</h2>
                 </div>
-                <button class="close-modal-btn" id="close-modal-btn" aria-label="Cerrar modal">&times;</button>
+                <button class="close-modal-btn" id="close-modal-btn" aria-label="Close modal">&times;</button>
             </div>
 
             <form id="monster-form" class="re-form">
                 <div class="form-group">
-                    <label for="monster-name">NOMBRE DEL ESPÉCIMEN *</label>
-                    <input type="text" id="monster-name" required placeholder="Ej: Tyrant T-002, Licker, Hunter...">
+                    <label for="monster-name">SPECIMEN NAME *</label>
+                    <input type="text" id="monster-name" required placeholder="e.g. Tyrant T-002, Licker, Hunter...">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="monster-virus">CEPA VIRAL / PATÓGENO *</label>
-                        <input type="text" id="monster-virus" required placeholder="Ej: T-Virus, G-Virus, Las Plagas...">
+                        <label for="monster-virus">VIRAL STRAIN / PATHOGEN *</label>
+                        <input type="text" id="monster-virus" required placeholder="e.g. T-Virus, G-Virus, Las Plagas...">
                     </div>
                     <div class="form-group">
-                        <label for="monster-game">APARICIÓN (JUEGO) *</label>
-                        <input type="text" id="monster-game" required placeholder="Ej: Resident Evil 2...">
+                        <label for="monster-game">FIRST APPEARANCE (GAME) *</label>
+                        <input type="text" id="monster-game" required placeholder="e.g. Resident Evil 2...">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="monster-danger">NIVEL DE AMENAZA (1 - 10) *</label>
+                    <label for="monster-danger">THREAT LEVEL (1 - 10) *</label>
                     <div class="range-wrapper">
                         <input type="range" id="monster-danger" min="1" max="10" value="5" step="1">
                         <span id="danger-value" class="danger-preview level-5">5 / 10</span>
@@ -146,24 +144,24 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="monster-weakness">PUNTOS DÉBILES / CONTRAMEDIDAS</label>
-                    <input type="text" id="monster-weakness" placeholder="Ej: Nitrógeno líquido, Lanzagranadas...">
+                    <label for="monster-weakness">KNOWN WEAKNESSES / COUNTERMEASURES</label>
+                    <input type="text" id="monster-weakness" placeholder="e.g. Liquid Nitrogen, Rocket Launcher...">
                 </div>
 
                 <input type="hidden" id="monster-id">
                 <div class="modal-actions">
-                    <button type="button" class="re-btn re-btn-outline" id="cancel-modal-btn">CANCELAR</button>
-                    <button type="submit" class="re-btn re-btn-primary" id="submit-modal-btn">GUARDAR REGISTRO</button>
+                    <button type="button" class="re-btn re-btn-outline" id="cancel-modal-btn">CANCEL</button>
+                    <button type="submit" class="re-btn re-btn-primary" id="submit-modal-btn">SAVE RECORD</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Sistema de Alertas Toast tipo Terminal -->
+    <!-- Terminal Toast Container -->
     <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
     <footer class="re-footer">
-        <p>UMBRELLA CORP // BIOLOGICAL WEAPONS DIVISION // ESTRICTAMENTE CONFIDENCIAL &copy; R.P.D. ARCHIVES</p>
+        <p>UMBRELLA CORP // BIOLOGICAL WEAPONS DIVISION // STRICTLY CONFIDENTIAL &copy; R.P.D. ARCHIVES</p>
     </footer>
 
     <!-- Script JavaScript -->

@@ -1,17 +1,17 @@
 /**
  * UMBRELLA ARCHIVES // BIOWEAPON RESEARCH DATABASE
- * Frontend en Vanilla JavaScript
- * Integración con API REST Spring Boot (/api/monsters)
- * Operaciones CRUD completas: Listar, Filtrar/Buscar, Crear, Editar (PUT), Purgar (DELETE)
+ * Pure Vanilla JavaScript Frontend
+ * Integration with Spring Boot REST API (/api/monsters)
+ * Full CRUD Operations: Read, Filter/Search, Create (POST), Edit (PUT), Purge (DELETE)
  */
 
-// Estado global de la aplicación
+// Application global state
 const API_URL = '/api/monsters';
 let allMonsters = [];
 let currentFilter = 'all';
 let searchQuery = '';
 
-// Catálogo por defecto (Fallback acorde a init.sql, solo texto)
+// Default catalog (matches init.sql as fallback)
 const FALLBACK_MONSTERS = [
     {
         id: 1,
@@ -19,7 +19,7 @@ const FALLBACK_MONSTERS = [
         virusType: 'T-Virus',
         gameAppearance: 'Resident Evil 1 & 2',
         dangerLevel: 3,
-        weakness: 'Fuego / Cabeza'
+        weakness: 'Fire / Headshot'
     },
     {
         id: 2,
@@ -27,7 +27,7 @@ const FALLBACK_MONSTERS = [
         virusType: 'T-Virus',
         gameAppearance: 'Resident Evil 2',
         dangerLevel: 7,
-        weakness: 'Ruido / Ceguera'
+        weakness: 'Loud Noise / Blindness'
     },
     {
         id: 3,
@@ -35,7 +35,7 @@ const FALLBACK_MONSTERS = [
         virusType: 'NE-Alpha + T-Virus',
         gameAppearance: 'Resident Evil 3',
         dangerLevel: 10,
-        weakness: 'Lanzacohetes / Acido'
+        weakness: 'Rocket Launcher / Acid'
     },
     {
         id: 4,
@@ -43,11 +43,11 @@ const FALLBACK_MONSTERS = [
         virusType: 'Las Plagas',
         gameAppearance: 'Resident Evil 4',
         dangerLevel: 5,
-        weakness: 'Granada de luz'
+        weakness: 'Flash Grenade'
     }
 ];
 
-// Elementos del DOM
+// DOM elements
 const monstersGrid = document.getElementById('monsters-grid');
 const searchInput = document.getElementById('search-input');
 const searchBtn = document.getElementById('search-btn');
@@ -58,7 +58,7 @@ const resetSearchBtn = document.getElementById('reset-search-btn');
 const quickFilters = document.getElementById('quick-filters');
 const connectionStatus = document.getElementById('connection-status');
 
-// Elementos del Modal de Registro / Edición
+// Modal Elements
 const openModalBtn = document.getElementById('open-modal-btn');
 const monsterModal = document.getElementById('monster-modal');
 const closeModalBtn = document.getElementById('close-modal-btn');
@@ -72,7 +72,7 @@ const dangerInput = document.getElementById('monster-danger');
 const dangerPreview = document.getElementById('danger-value');
 
 // ==========================================================================
-// INICIALIZACIÓN
+// INITIALIZATION
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
@@ -84,7 +84,7 @@ async function initApp() {
 }
 
 // ==========================================================================
-// PETICIONES A LA API (SPRING BOOT REST)
+// API REQUESTS (SPRING BOOT REST)
 // ==========================================================================
 
 async function fetchMonsters() {
@@ -100,12 +100,12 @@ async function fetchMonsters() {
             allMonsters = [...FALLBACK_MONSTERS];
         }
 
-        updateConnectionStatus(true, 'CONECTADO AL SERVIDOR');
+        updateConnectionStatus(true, 'SYSTEM ONLINE');
     } catch (err) {
-        console.warn('No se pudo conectar a la API local de Spring Boot. Modo de demostración activo.', err);
+        console.warn('Could not connect to Spring Boot backend. Fallback demo mode active.', err);
         allMonsters = [...FALLBACK_MONSTERS];
-        updateConnectionStatus(false, 'MODO ARCHIVO LOCAL (OFFLINE)');
-        showToast('Modo de contingencia: visualizando datos locales', 'error');
+        updateConnectionStatus(false, 'LOCAL ARCHIVE MODE (OFFLINE)');
+        showToast('Contingency mode: viewing offline local dataset', 'error');
     } finally {
         renderMonsters();
     }
@@ -122,18 +122,17 @@ async function createMonster(monsterData) {
         if (response.ok) {
             const saved = await response.json();
             allMonsters.unshift(saved);
-            showToast(`¡Espécimen [${saved.name}] registrado exitosamente!`, 'success');
+            showToast(`Specimen [${saved.name}] successfully registered!`, 'success');
         } else {
-            throw new Error('Error al guardar en el servidor');
+            throw new Error('Server error while saving');
         }
     } catch (err) {
-        // En caso de modo offline, guardado en memoria local
         const newMonster = {
             id: Date.now(),
             ...monsterData
         };
         allMonsters.unshift(newMonster);
-        showToast(`Espécimen [${newMonster.name}] guardado en memoria local`, 'success');
+        showToast(`Specimen [${newMonster.name}] saved in local memory`, 'success');
     } finally {
         renderMonsters();
         closeModal();
@@ -152,16 +151,15 @@ async function updateMonster(id, monsterData) {
             const updated = await response.json();
             const index = allMonsters.findIndex(m => m.id === id);
             if (index !== -1) allMonsters[index] = updated;
-            showToast(`¡Espécimen [${updated.name}] actualizado con éxito!`, 'success');
+            showToast(`Specimen [${updated.name}] successfully updated!`, 'success');
         } else {
-            throw new Error('Error al actualizar en el servidor');
+            throw new Error('Server error while updating');
         }
     } catch (err) {
-        // En caso de modo offline, actualización en memoria local
         const index = allMonsters.findIndex(m => m.id === id);
         if (index !== -1) {
             allMonsters[index] = { id, ...monsterData };
-            showToast(`Espécimen [${monsterData.name}] actualizado localmente`, 'success');
+            showToast(`Specimen [${monsterData.name}] updated locally`, 'success');
         }
     } finally {
         renderMonsters();
@@ -170,7 +168,7 @@ async function updateMonster(id, monsterData) {
 }
 
 async function deleteMonster(id, name) {
-    if (!confirm(`¿CONFIRMAR ELIMINACIÓN DEL EXPEDIENTE [${name}]?\nEsta acción es irreversible en los archivos de Umbrella.`)) {
+    if (!confirm(`CONFIRM PURGE OF RECORD [${name}]?\nThis action is irreversible in Umbrella archives.`)) {
         return;
     }
 
@@ -178,26 +176,24 @@ async function deleteMonster(id, name) {
         const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         if (response.ok || response.status === 204) {
             allMonsters = allMonsters.filter(m => m.id !== id);
-            showToast(`Expediente [${name}] purgado con éxito`, 'success');
+            showToast(`Record [${name}] successfully purged`, 'success');
         } else {
-            throw new Error('Error al eliminar');
+            throw new Error('Server error while deleting');
         }
     } catch (err) {
-        // Fallback local
         allMonsters = allMonsters.filter(m => m.id !== id);
-        showToast(`Expediente [${name}] eliminado localmente`, 'success');
+        showToast(`Record [${name}] removed locally`, 'success');
     } finally {
         renderMonsters();
     }
 }
 
 // ==========================================================================
-// RENDERIZADO DEL GRID DE TARJETAS (SOLO TEXTO)
+// RENDERING CARDS GRID
 // ==========================================================================
 
 function renderMonsters() {
     const filtered = allMonsters.filter(monster => {
-        // Filtro por texto de búsqueda
         const q = searchQuery.toLowerCase().trim();
         const matchesSearch = 
             !q ||
@@ -206,7 +202,6 @@ function renderMonsters() {
             (monster.gameAppearance && monster.gameAppearance.toLowerCase().includes(q)) ||
             (monster.weakness && monster.weakness.toLowerCase().includes(q));
 
-        // Filtro rápido por categoría
         let matchesFilter = true;
         if (currentFilter === 'high-threat') {
             matchesFilter = (monster.dangerLevel || 0) >= 7;
@@ -217,10 +212,8 @@ function renderMonsters() {
         return matchesSearch && matchesFilter;
     });
 
-    // Actualizar contador
     specimensCount.textContent = filtered.length;
 
-    // Manejo de estado vacío
     if (filtered.length === 0) {
         monstersGrid.innerHTML = '';
         emptyState.classList.remove('hidden');
@@ -228,11 +221,8 @@ function renderMonsters() {
     }
 
     emptyState.classList.add('hidden');
-
-    // Construcción del HTML de las tarjetas
     monstersGrid.innerHTML = filtered.map(monster => createCardHTML(monster)).join('');
 
-    // Asignar eventos a los botones de cada tarjeta (Editar y Purgar)
     filtered.forEach(monster => {
         const editBtn = document.getElementById(`edit-btn-${monster.id}`);
         const deleteBtn = document.getElementById(`delete-btn-${monster.id}`);
@@ -246,54 +236,47 @@ function renderMonsters() {
     });
 }
 
-/**
- * Genera el markup HTML para cada tarjeta en formato texto técnico.
- */
 function createCardHTML(monster) {
     const danger = Number(monster.dangerLevel) || 1;
     const dangerPercentage = Math.min(Math.max(danger * 10, 10), 100);
     
-    // Configuración estética según el nivel de amenaza
     let threatClass = 'threat-low';
-    let threatText = 'BAJO';
+    let threatText = 'LOW';
     let meterColor = 'var(--hazard-green)';
 
     if (danger >= 9) {
         threatClass = 'threat-extreme';
-        threatText = 'CRÍTICO';
+        threatText = 'CRITICAL';
         meterColor = 'var(--umbrella-red)';
     } else if (danger >= 7) {
         threatClass = 'threat-high';
-        threatText = 'ALTO';
+        threatText = 'HIGH';
         meterColor = '#ff4d6d';
     } else if (danger >= 4) {
         threatClass = 'threat-medium';
-        threatText = 'MEDIO';
+        threatText = 'MEDIUM';
         meterColor = 'var(--hazard-yellow)';
     }
 
     return `
         <div class="monster-card" id="card-${monster.id}" data-id="${monster.id}">
-            <!-- Encabezado de la Tarjeta (Solo Texto) -->
             <div class="card-header-bar">
                 <div class="card-meta">
                     <span class="specimen-id">B.O.W. #${String(monster.id).padStart(3, '0')}</span>
-                    <span class="specimen-game">${escapeHTML(monster.gameAppearance || 'N/D')}</span>
+                    <span class="specimen-game">${escapeHTML(monster.gameAppearance || 'N/A')}</span>
                 </div>
                 <div class="threat-badge ${threatClass}">
-                    <span>AMENAZA:</span>
+                    <span>THREAT:</span>
                     <strong>${danger}/10 [${threatText}]</strong>
                 </div>
             </div>
 
-            <!-- Contenido y detalles del monstruo -->
             <div class="card-content">
                 <h2 class="specimen-name">${escapeHTML(monster.name)}</h2>
 
-                <!-- Medidor de Nivel de Peligro -->
                 <div class="danger-meter-group">
                     <div class="danger-meter-label">
-                        <span>ÍNDICE DE LETHALIDAD</span>
+                        <span>LETHALITY INDEX</span>
                         <span>${danger * 10}%</span>
                     </div>
                     <div class="danger-track">
@@ -301,22 +284,20 @@ function createCardHTML(monster) {
                     </div>
                 </div>
 
-                <!-- Detalles técnicos -->
                 <div class="details-list">
                     <div class="detail-row">
-                        <span class="detail-label">PATÓGENO:</span>
-                        <span class="detail-value"><span class="virus-pill">${escapeHTML(monster.virusType || 'Desconocido')}</span></span>
+                        <span class="detail-label">PATHOGEN:</span>
+                        <span class="detail-value"><span class="virus-pill">${escapeHTML(monster.virusType || 'Unknown')}</span></span>
                     </div>
                     <div class="detail-row">
-                        <span class="detail-label">DEBILIDAD:</span>
-                        <span class="detail-value">${escapeHTML(monster.weakness || 'Sin contramedidas registradas')}</span>
+                        <span class="detail-label">WEAKNESS:</span>
+                        <span class="detail-value">${escapeHTML(monster.weakness || 'No registered countermeasures')}</span>
                     </div>
                 </div>
 
-                <!-- Botones de Acción (EDITAR y PURGAR) -->
                 <div class="card-actions">
-                    <button class="card-btn card-btn-edit" id="edit-btn-${monster.id}">EDITAR</button>
-                    <button class="card-btn card-btn-delete" id="delete-btn-${monster.id}">PURGAR</button>
+                    <button class="card-btn card-btn-edit" id="edit-btn-${monster.id}">EDIT</button>
+                    <button class="card-btn card-btn-delete" id="delete-btn-${monster.id}">PURGE</button>
                 </div>
             </div>
         </div>
@@ -324,25 +305,22 @@ function createCardHTML(monster) {
 }
 
 // ==========================================================================
-// MANEJADORES DE EVENTOS (BÚSQUEDA, FILTROS, MODALES)
+// EVENT LISTENERS
 // ==========================================================================
 
 function setupEventListeners() {
-    // 1. Barra de Búsqueda reactiva
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value;
         clearSearchBtn.classList.toggle('hidden', searchQuery.length === 0);
         renderMonsters();
     });
 
-    // 2. Clic en la lupa de la derecha
     searchBtn.addEventListener('click', () => {
         searchQuery = searchInput.value;
         renderMonsters();
         searchInput.focus();
     });
 
-    // Enter en input de búsqueda
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             searchQuery = searchInput.value;
@@ -350,7 +328,6 @@ function setupEventListeners() {
         }
     });
 
-    // Limpiar búsqueda
     clearSearchBtn.addEventListener('click', () => {
         searchInput.value = '';
         searchQuery = '';
@@ -369,7 +346,6 @@ function setupEventListeners() {
         renderMonsters();
     });
 
-    // 3. Filtros rápidos
     quickFilters.addEventListener('click', (e) => {
         if (!e.target.classList.contains('filter-chip')) return;
 
@@ -380,28 +356,23 @@ function setupEventListeners() {
         renderMonsters();
     });
 
-    // 4. Modal para nuevo espécimen
     openModalBtn.addEventListener('click', openCreateModal);
     closeModalBtn.addEventListener('click', closeModal);
     cancelModalBtn.addEventListener('click', closeModal);
 
-    // Cerrar modal al dar click fuera
     monsterModal.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-backdrop')) closeModal();
     });
 
-    // Tecla ESC para cerrar modal
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeModal();
     });
 
-    // Slider de peligro
     dangerInput.addEventListener('input', (e) => {
         const val = e.target.value;
         dangerPreview.textContent = `${val} / 10`;
     });
 
-    // Envío del formulario (Creación o Actualización)
     monsterForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -423,7 +394,7 @@ function setupEventListeners() {
 }
 
 // ==========================================================================
-// CONTROL DE MODALES (CREAR / EDITAR)
+// MODAL CONTROLS
 // ==========================================================================
 
 function openCreateModal() {
@@ -432,9 +403,9 @@ function openCreateModal() {
     dangerInput.value = 5;
     dangerPreview.textContent = '5 / 10';
 
-    modalTag.textContent = 'PROTOCOLO DE CONTENCIÓN';
-    modalTitle.textContent = 'REGISTRAR NUEVA BIOARMA';
-    submitModalBtn.textContent = 'GUARDAR REGISTRO';
+    modalTag.textContent = 'CONTAINMENT PROTOCOL';
+    modalTitle.textContent = 'REGISTER NEW BIOWEAPON';
+    submitModalBtn.textContent = 'SAVE RECORD';
 
     monsterModal.classList.remove('hidden');
     document.getElementById('monster-name').focus();
@@ -452,9 +423,9 @@ function openEditModal(monster) {
     
     document.getElementById('monster-weakness').value = monster.weakness || '';
 
-    modalTag.textContent = `MODIFICAR ARCHIVO B.O.W. #${String(monster.id).padStart(3, '0')}`;
-    modalTitle.textContent = `EDITAR: ${monster.name.toUpperCase()}`;
-    submitModalBtn.textContent = 'GUARDAR CAMBIOS';
+    modalTag.textContent = `MODIFY RECORD B.O.W. #${String(monster.id).padStart(3, '0')}`;
+    modalTitle.textContent = `EDIT: ${monster.name.toUpperCase()}`;
+    submitModalBtn.textContent = 'SAVE CHANGES';
 
     monsterModal.classList.remove('hidden');
     document.getElementById('monster-name').focus();
