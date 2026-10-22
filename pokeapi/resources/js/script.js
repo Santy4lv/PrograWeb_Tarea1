@@ -89,6 +89,14 @@ const resetSearchBtn = document.getElementById('reset-search-btn');
 const loadMoreBtn = document.getElementById('load-more-btn');
 const loadMoreContainer = document.getElementById('load-more-container');
 const connectionStatus = document.getElementById('connection-status');
+const debounceIndicator = document.getElementById('debounce-indicator');
+const debounceText = document.getElementById('debounce-text');
+
+// Debounce state configuration (4000ms delay)
+const DEBOUNCE_DELAY_MS = 4000;
+let debounceTimeoutId = null;
+let debounceIntervalId = null;
+let debounceStartTime = null;
 
 // Modal DOM references
 const modal = document.getElementById('pokemon-modal');
@@ -542,27 +550,101 @@ function closeModal() {
 }
 
 // ==========================================================================
+// ==========================================================================
+// DEBOUNCING ENGINE (4-SECOND DELAY)
+// ==========================================================================
+function startDebouncedSearch() {
+    clearDebounceTimers();
+
+    const rawValue = searchInput.value;
+    clearSearchBtn.classList.toggle('hidden', rawValue.length === 0);
+
+    if (rawValue.trim().length === 0) {
+        searchQuery = '';
+        renderPokemonGrid();
+        hideDebounceIndicator();
+        return;
+    }
+
+    showDebounceIndicator(DEBOUNCE_DELAY_MS / 1000);
+    debounceStartTime = Date.now();
+
+    // Update real-time countdown every 100ms
+    debounceIntervalId = setInterval(() => {
+        const elapsed = Date.now() - debounceStartTime;
+        const remaining = Math.max(0, (DEBOUNCE_DELAY_MS - elapsed) / 1000);
+        if (debounceText) {
+            debounceText.textContent = `Debouncing request: ${remaining.toFixed(1)}s`;
+        }
+    }, 100);
+
+    // Trigger search after 4000ms inactivity
+    debounceTimeoutId = setTimeout(() => {
+        clearDebounceTimers();
+        hideDebounceIndicator();
+        executeSearch();
+    }, DEBOUNCE_DELAY_MS);
+}
+
+function clearDebounceTimers() {
+    if (debounceTimeoutId) {
+        clearTimeout(debounceTimeoutId);
+        debounceTimeoutId = null;
+    }
+    if (debounceIntervalId) {
+        clearInterval(debounceIntervalId);
+        debounceIntervalId = null;
+    }
+}
+
+function showDebounceIndicator(initialSeconds) {
+    if (debounceIndicator && debounceText) {
+        debounceText.textContent = `Debouncing request: ${initialSeconds.toFixed(1)}s`;
+        debounceIndicator.classList.remove('hidden');
+    }
+}
+
+function hideDebounceIndicator() {
+    if (debounceIndicator) {
+        debounceIndicator.classList.add('hidden');
+    }
+}
+
+function executeSearch() {
+    searchQuery = searchInput.value.toLowerCase().trim();
+    renderPokemonGrid();
+    if (searchQuery) {
+        handleDirectSearch();
+    }
+}
+
+// ==========================================================================
 // EVENT LISTENERS
 // ==========================================================================
 function setupEventListeners() {
-    // Real-time search
-    searchInput.addEventListener('input', (e) => {
-        searchQuery = e.target.value;
-        clearSearchBtn.classList.toggle('hidden', searchQuery.length === 0);
-        renderPokemonGrid();
+    // 4-Second Debounced Search on input
+    searchInput.addEventListener('input', startDebouncedSearch);
+
+    // Bypass debouncing on Enter key or explicit search button click
+    searchBtn.addEventListener('click', () => {
+        clearDebounceTimers();
+        hideDebounceIndicator();
+        executeSearch();
     });
 
-    // Remote direct search on Enter key or search button
-    searchBtn.addEventListener('click', handleDirectSearch);
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            handleDirectSearch();
+            clearDebounceTimers();
+            hideDebounceIndicator();
+            executeSearch();
         }
     });
 
-    // Clear search button
+    // Clear search button immediately cancels debounce and resets
     clearSearchBtn.addEventListener('click', () => {
+        clearDebounceTimers();
+        hideDebounceIndicator();
         searchInput.value = '';
         searchQuery = '';
         clearSearchBtn.classList.add('hidden');
@@ -570,8 +652,10 @@ function setupEventListeners() {
         searchInput.focus();
     });
 
-    // Reset search button
+    // Reset search button immediately cancels debounce and resets
     resetSearchBtn.addEventListener('click', () => {
+        clearDebounceTimers();
+        hideDebounceIndicator();
         searchInput.value = '';
         searchQuery = '';
         clearSearchBtn.classList.add('hidden');

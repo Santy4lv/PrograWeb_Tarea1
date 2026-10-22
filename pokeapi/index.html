@@ -65,6 +65,11 @@
                         </svg>
                     </button>
                     <button id="clear-search-btn" class="clear-btn hidden" title="Clear search" aria-label="Clear search">✕</button>
+                    <!-- Debounce status indicator (4.0s delay) -->
+                    <div id="debounce-indicator" class="debounce-indicator hidden" aria-live="polite">
+                        <span class="debounce-pulse-dot"></span>
+                        <span id="debounce-text">Debouncing request: 4.0s</span>
+                    </div>
                 </div>
 
                 <div class="generation-select-wrapper">
