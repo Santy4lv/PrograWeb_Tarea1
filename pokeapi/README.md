@@ -1,72 +1,79 @@
-# Pokédex Archives // PokeAPI Database (Tarea 1)
+# Pokédex Archives // PokeAPI Database (Homework 1 - Part 2)
 
-Aplicación Web interactiva de alto rendimiento desarrollada en **HTML5, Vanilla CSS3 y Vanilla JavaScript**, que consume y combina información en tiempo real de **3 endpoints REST de PokeAPI**, con diseño responsivo basado en media queries idénticas a la primera entrega, visualización de ilustraciones oficiales en alta resolución y ventana modal (popup) con descripción biológica completa.
-
----
-
-## 🚀 3 Endpoints de PokeAPI Implementados
-
-El proyecto consume de manera explícita y coordinada los siguientes 3 endpoints oficiales de PokeAPI:
-
-1. **`GET https://pokeapi.co/api/v2/pokemon/{id o nombre}`**
-   - **Propósito**: Obtención de datos biológicos y de combate básicos.
-   - **Campos utilizados**:
-     - `sprites.other['official-artwork'].front_default`: Ilustración oficial en alta definición.
-     - `cries.latest`: Audio del rugido oficial del Pokémon (reproducible en el modal).
-     - `types`: Lista de tipos elementales (Fuego, Agua, Planta, etc.).
-     - `stats`: PS, Ataque, Defensa, Ataque Especial, Defensa Especial, Velocidad.
-     - `height` y `weight`: Medidas físicas del espécimen.
-
-2. **`GET https://pokeapi.co/api/v2/pokemon-species/{id o nombre}`**
-   - **Propósito**: Obtención del lore, descripción biológica en español y taxonomía.
-   - **Campos utilizados**:
-     - `flavor_text_entries`: Descripción oficial de la Pokédex filtrada en idioma Español (`es`).
-     - `genera`: Clasificación formal (ejemplo: *"Pokémon Semilla"*, *"Pokémon Llama"*).
-     - `habitat`: Hábitat natural del espécimen.
-     - `capture_rate`: Índice de dificultad de captura (0 - 255).
-     - `evolution_chain.url`: Enlace al árbol de evolución del espécimen.
-
-3. **`GET https://pokeapi.co/api/v2/evolution-chain/{id}`**
-   - **Propósito**: Obtención y despliegue del árbol evolutivo completo.
-   - **Campos utilizados**:
-     - `chain`: Recorrido recursivo de las etapas evolutivas, requisitos de nivel (`min_level`), métodos de evolución y enlaces a cada etapa con sus respectivos sprites interactivos.
+High-performance interactive Web Application developed in **pure HTML5, Vanilla CSS3, and Vanilla JavaScript**, consuming and combining data from **3 official REST endpoints from PokeAPI** using a **composite relational JOIN pattern**. Features responsive design powered by CSS Grid and Media Queries, high-definition official artwork, live cry audio playback, and an interactive biological modal.
 
 ---
 
-## 📱 Sistema de Grid Responsivo (Media Queries)
+## 🔗 The Composite REST API JOIN Pattern
 
-El diseño de las tarjetas se adapta de forma fluida a cualquier dispositivo utilizando la misma arquitectura de **CSS Grid** de la Tarea 1:
+In relational databases (SQL), a `JOIN` merges records from multiple tables based on related keys. In modern decoupled architectures, client-side or gateway API orchestration achieves the exact same composite result by querying related REST endpoints in sequence or parallel:
 
-| Dispositivo / Pantalla | Breakpoint Media Query | Tarjetas por Fila |
+```mermaid
+graph TD
+    A["1. Primary Entity: GET /pokemon/{id_or_name}"] -->|Extract PK: pokemon.id| B["2. Related Lore: GET /pokemon-species/{id}"]
+    B -->|Extract FK: speciesData.evolution_chain.url| C["3. Nested Chain: GET /evolution-chain/{id}"]
+    A -->|Basic Combat Stats & Artwork| D["Consolidated Specimen View (Modal)"]
+    B -->|Habitat, Genus & English Lore| D
+    C -->|Recursive Evolution Stages & Levels| D
+```
+
+### Relational Mapping Breakdown:
+
+1. **Step 1 (Base Entity - Table 1)**: `GET https://pokeapi.co/api/v2/pokemon/{id}`
+   - **Fields**: `id` (Primary Key), `name`, `sprites`, `types`, `stats`, `height`, `weight`, `cries`.
+2. **Step 2 (Joined Entity - Table 2)**: `GET https://pokeapi.co/api/v2/pokemon-species/{id}`
+   - **Join Condition**: `pokemon-species.id = pokemon.id`.
+   - **Fields**: `genera`, `flavor_text_entries`, `habitat`, `capture_rate`, `evolution_chain.url` (Foreign Key).
+3. **Step 3 (Nested Joined Entity - Table 3)**: `GET https://pokeapi.co/api/v2/evolution-chain/{evolution_id}`
+   - **Join Condition**: `evolution-chain.url = species.evolution_chain.url`.
+   - **Fields**: Recursive `chain` object with `species`, `evolution_details.min_level`, `trigger`.
+
+> **DevTools Inspection**: When opening any Pokémon modal in the application, check your browser's Developer Console (`F12` $\rightarrow$ Console) to view the collapsed `[REST API JOIN]` group logging each join step with payload metadata.
+
+---
+
+## ⏱️ 4-Second Debouncing Engine
+
+To optimize network traffic and prevent excessive calls to external APIs while the user is typing, a **4000 ms (4.0s) Debouncing Engine** is built into the search bar:
+
+- **Debounce Interval**: 4000 milliseconds of user inactivity required before dispatching the search and remote API request.
+- **Visual Feedback**: A live countdown badge appears under the search input (`Debouncing request: 3.8s...`) so the user clearly sees the countdown in real time.
+- **Immediate Bypass**: Pressing the `Enter` key or clicking the magnifying glass immediately flushes the debounce timer and performs the search instantaneously.
+- **Instant Reset**: Clearing the search immediately aborts any active debounce timer.
+
+---
+
+## 📱 Responsive Grid System (Media Queries)
+
+Card layouts adapt across screen dimensions using CSS Grid:
+
+| Device Category | Breakpoint Media Query | Cards per Row |
 | :--- | :--- | :--- |
-| **Móviles / Teléfonos** | Por defecto (`< 640px`) | **1 Tarjeta** por fila |
-| **Tablets / Pantallas intermedias** | `@media (min-width: 640px)` | **2 Tarjetas** por fila |
-| **Escritorio / Vistas 1080p** | `@media (min-width: 1024px)` | **3 Tarjetas** por fila |
-| **Monitores Ultrawide / 2K / 4K** | `@media (min-width: 1440px)` | **4 Tarjetas** por fila |
+| **Mobile Phones** | Default (`< 640px`) | **1 Card** per row |
+| **Tablets / Medium Screens** | `@media (min-width: 640px)` | **2 Cards** per row |
+| **Laptops / 1080p Desktop** | `@media (min-width: 1024px)` | **3 Cards** per row |
+| **Ultrawide / 2K / 4K Monitors** | `@media (min-width: 1440px)` | **4 Cards** per row |
 
 ---
 
-## ✨ Características Principales
+## 📁 Resource Architecture
 
-- **Galería con Ilustraciones Oficiales**: Todas las tarjetas cuentan con el artwork de alta resolución provisto por PokeAPI con resplandor ambiental adaptado al tipo primario del Pokémon.
-- **Modal / Popup Interactivo Detallado**:
-  - Al hacer clic en cualquier tarjeta, se abre una ventana emergente que consulta y combina los datos de los 3 endpoints.
-  - Lore en español oficial de la franquicia.
-  - Gráfico de barras animadas de estadísticas de combate.
-  - Reproductor interactivo del sonido/rugido (*Cry*) de cada Pokémon.
-  - Visualización de la cadena evolutiva con navegación interactiva entre etapas.
-- **Búsqueda y Filtros Rápidos**:
-  - Búsqueda en tiempo real por nombre, número de Pokédex o tipo.
-  - Búsqueda remota inteligente para cualquier Pokémon del 1 al 1025.
-  - Filtro por tipos elementales (Fuego, Agua, Planta, Eléctrico, Psíquico, Dragón, Fantasma, Lucha).
-  - Selector de generaciones (Kanto Gen 1, Johto Gen 2, Hoenn Gen 3, Sinnoh Gen 4 o Todas).
-- **Estética Cyber-Pokédex**: Modo oscuro con tipografías Google Fonts (`Orbitron`, `Rajdhani`, `Share Tech Mono`), efecto holograma/CRT sutil y transiciones fluidas.
+According to standard frontend engineering practices, web assets are structured in dedicated resource folders:
+
+```text
+pokeapi/
+├── index.html                  # Main entrypoint
+├── resources/                  # Resource assets directory
+│   ├── css/
+│   │   └── styles.css          # Cyber-Pokédex dark theme & responsive grid
+│   └── js/
+│       └── script.js           # PokeAPI engine, 4s debounce & API JOIN logic
+└── README.md                   # Technical documentation
+```
 
 ---
 
-## 🛠️ Cómo Ejecutar el Proyecto
+## 🛠️ How to Run
 
-Al ser un proyecto desarrollado puramente en tecnologías web estándar, no requiere compiladores, bases de datos externas ni gestores de paquetes:
-
-1. Simplemente abre el archivo `index.html` en cualquier navegador web moderno (Chrome, Edge, Firefox, Safari).
-2. O alternativamente, usa una extensión como **Live Server** en VS Code / tu editor preferido.
+1. Open `index.html` in any modern web browser (Chrome, Edge, Firefox, Brave).
+2. Alternatively, use VS Code's **Live Server** extension for live reload.

@@ -1,19 +1,19 @@
 /**
  * ==========================================================================
- * POKÉDEX ARCHIVES // POKEAPI CONSUMPTION ENGINE (TAREA 1)
- * Frontend en JavaScript Vanilla Puro
+ * POKÉDEX ARCHIVES // POKEAPI CONSUMPTION ENGINE (HOMEWORK 1)
+ * Pure Vanilla JavaScript Frontend
  * 
- * Consumo explícito de 3 Endpoints REST de PokeAPI:
- * 1. https://pokeapi.co/api/v2/pokemon/{id_o_nombre}
- *    -> Datos básicos, tipos, estadísticas de combate, medidas, cries (audio) y sprites/artwork oficial en alta resolución.
- * 2. https://pokeapi.co/api/v2/pokemon-species/{id_o_nombre}
- *    -> Descripción oficial / lore en Español (flavor_text), género/clasificación, hábitat, ratio de captura y enlace a evolución.
+ * Explicit consumption of 3 REST Endpoints from PokeAPI:
+ * 1. https://pokeapi.co/api/v2/pokemon/{id_or_name}
+ *    -> Basic attributes, elemental types, combat stats, physical dimensions, cries (audio) and official artwork.
+ * 2. https://pokeapi.co/api/v2/pokemon-species/{id_or_name}
+ *    -> Official lore/description (flavor_text), genus classification, habitat, capture rate and evolution link.
  * 3. https://pokeapi.co/api/v2/evolution-chain/{id}
- *    -> Estructura completa de la cadena evolutiva (etapas, niveles y desencadenantes).
+ *    -> Complete evolutionary tree structure (stages, minimum levels and evolution triggers).
  * ==========================================================================
  */
 
-// Configuración y Endpoints
+// Configuration and Endpoints
 const API_BASE = 'https://pokeapi.co/api/v2';
 const ENDPOINTS = {
     POKEMON: `${API_BASE}/pokemon`,
@@ -21,7 +21,7 @@ const ENDPOINTS = {
     EVOLUTION: `${API_BASE}/evolution-chain`
 };
 
-// Rangos de generaciones
+// Generation ranges
 const GENERATIONS = {
     '1': { offset: 0, limit: 151, startId: 1, endId: 151 },
     '2': { offset: 151, limit: 100, startId: 152, endId: 251 },
@@ -30,39 +30,39 @@ const GENERATIONS = {
     'all': { offset: 0, limit: 1025, startId: 1, endId: 1025 }
 };
 
-// Traducción de tipos al español para visualización
+// Type translations for display
 const TYPE_TRANSLATIONS = {
     normal: 'Normal',
-    fire: 'Fuego',
-    water: 'Agua',
-    grass: 'Planta',
-    electric: 'Eléctrico',
-    ice: 'Hielo',
-    fighting: 'Lucha',
-    poison: 'Veneno',
-    ground: 'Tierra',
-    flying: 'Volador',
-    psychic: 'Psíquico',
-    bug: 'Bicho',
-    rock: 'Roca',
-    ghost: 'Fantasma',
-    dragon: 'Dragón',
-    steel: 'Acero',
-    fairy: 'Hada',
-    dark: 'Siniestro'
+    fire: 'Fire',
+    water: 'Water',
+    grass: 'Grass',
+    electric: 'Electric',
+    ice: 'Ice',
+    fighting: 'Fighting',
+    poison: 'Poison',
+    ground: 'Ground',
+    flying: 'Flying',
+    psychic: 'Psychic',
+    bug: 'Bug',
+    rock: 'Rock',
+    ghost: 'Ghost',
+    dragon: 'Dragon',
+    steel: 'Steel',
+    fairy: 'Fairy',
+    dark: 'Dark'
 };
 
-// Nombres legibles para estadísticas
+// Readable names for combat stats
 const STAT_NAMES = {
-    hp: 'PS',
-    attack: 'Ataque',
-    defense: 'Defensa',
-    'special-attack': 'Atq. Esp',
-    'special-defense': 'Def. Esp',
-    speed: 'Velocidad'
+    hp: 'HP',
+    attack: 'Attack',
+    defense: 'Defense',
+    'special-attack': 'Sp. Atk',
+    'special-defense': 'Sp. Def',
+    speed: 'Speed'
 };
 
-// Estado global de la aplicación
+// Global application state
 let allLoadedPokemon = [];
 let currentOffset = 0;
 const BATCH_SIZE = 24;
@@ -71,11 +71,11 @@ let activeTypeFilter = 'all';
 let searchQuery = '';
 let isLoading = false;
 
-// Caché de detalles adicionales para rendimiento (species y evolution)
+// Additional details cache for performance (species and evolution)
 const speciesCache = new Map();
 const evolutionCache = new Map();
 
-// Referencias del DOM
+// DOM references
 const pokemonGrid = document.getElementById('pokemon-grid');
 const searchInput = document.getElementById('search-input');
 const searchBtn = document.getElementById('search-btn');
@@ -89,8 +89,16 @@ const resetSearchBtn = document.getElementById('reset-search-btn');
 const loadMoreBtn = document.getElementById('load-more-btn');
 const loadMoreContainer = document.getElementById('load-more-container');
 const connectionStatus = document.getElementById('connection-status');
+const debounceIndicator = document.getElementById('debounce-indicator');
+const debounceText = document.getElementById('debounce-text');
 
-// Referencias del Modal
+// Debounce state configuration (4000ms delay)
+const DEBOUNCE_DELAY_MS = 4000;
+let debounceTimeoutId = null;
+let debounceIntervalId = null;
+let debounceStartTime = null;
+
+// Modal DOM references
 const modal = document.getElementById('pokemon-modal');
 const modalBackdrop = document.getElementById('modal-backdrop');
 const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -112,7 +120,7 @@ const playCryBtn = document.getElementById('play-cry-btn');
 const pokemonCryAudio = document.getElementById('pokemon-cry-audio');
 
 // ==========================================================================
-// INICIALIZACIÓN DE LA APLICACIÓN
+// APPLICATION INITIALIZATION
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
@@ -126,7 +134,7 @@ async function initApp() {
 }
 
 // ==========================================================================
-// ENDPOINT 1: /pokemon (Listado y detalles básicos de combate)
+// ENDPOINT 1: /pokemon (Listing and basic combat attributes)
 // ==========================================================================
 async function loadPokemonBatch() {
     if (isLoading) return;
@@ -146,20 +154,20 @@ async function loadPokemonBatch() {
             return;
         }
 
-        // Llamada al endpoint 1 para obtener lista paginada
+        // Call endpoint 1 to obtain paginated list
         const response = await fetch(`${ENDPOINTS.POKEMON}?offset=${offset}&limit=${fetchCount}`);
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         const data = await response.json();
 
-        // Obtener detalles individuales concurrentemente usando /pokemon/{id}
+        // Fetch individual details concurrently using /pokemon/{id}
         const detailPromises = data.results.map(p => fetch(p.url).then(r => r.json()));
         const pokemonDetails = await Promise.all(detailPromises);
 
-        // Almacenar en el arreglo global
+        // Store into global collection
         allLoadedPokemon.push(...pokemonDetails);
         currentOffset += fetchCount;
 
-        // Si ya cargamos todos los de la generación, ocultar botón de cargar más
+        // Hide load more button if all generation specimens are loaded
         if (currentOffset >= genInfo.limit) {
             loadMoreContainer.classList.add('hidden');
         } else {
@@ -169,7 +177,7 @@ async function loadPokemonBatch() {
         renderPokemonGrid();
         updateConnectionStatus(true);
     } catch (error) {
-        console.error('Error al cargar Pokémon desde PokeAPI:', error);
+        console.error('Error loading Pokémon from PokeAPI:', error);
         updateConnectionStatus(false);
     } finally {
         showLoading(false);
@@ -178,7 +186,7 @@ async function loadPokemonBatch() {
 }
 
 // ==========================================================================
-// RENDERIZADO DEL GRID DE TARJETAS (RESPONSIVO MEDIANTE MEDIA QUERIES)
+// RENDERING CARDS GRID
 // ==========================================================================
 function renderPokemonGrid() {
     const filtered = getFilteredPokemon();
@@ -211,15 +219,15 @@ function createPokemonCard(pokemon) {
     card.setAttribute('data-id', pokemon.id);
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
-    card.setAttribute('aria-label', `Ver detalles de ${pokemon.name}`);
+    card.setAttribute('aria-label', `View details for ${pokemon.name}`);
 
-    // Extraer imagen oficial en alta resolución
+    // Extract official high-resolution artwork
     const artworkUrl = pokemon.sprites.other?.['official-artwork']?.front_default 
         || pokemon.sprites.other?.home?.front_default 
         || pokemon.sprites.front_default 
         || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
 
-    // Tipos y colores
+    // Types and colors
     const primaryType = pokemon.types[0]?.type?.name || 'normal';
     const hpStat = pokemon.stats.find(s => s.stat.name === 'hp')?.base_stat || 0;
     const atkStat = pokemon.stats.find(s => s.stat.name === 'attack')?.base_stat || 0;
@@ -234,13 +242,13 @@ function createPokemonCard(pokemon) {
     card.innerHTML = `
         <div class="card-top-bar">
             <span class="pokemon-id-tag">#${String(pokemon.id).padStart(3, '0')}</span>
-            <span class="pokemon-hp-tag">PS: <strong>${hpStat}</strong></span>
+            <span class="pokemon-hp-tag">HP: <strong>${hpStat}</strong></span>
         </div>
         <div class="card-image-box">
             <div class="card-ambient-glow" style="background-color: var(--type-${primaryType}, var(--pk-blue));"></div>
             <img 
                 src="${artworkUrl}" 
-                alt="Ilustración oficial de ${pokemon.name}" 
+                alt="Official artwork of ${pokemon.name}" 
                 class="card-pokemon-img"
                 loading="lazy"
             >
@@ -254,26 +262,25 @@ function createPokemonCard(pokemon) {
             </div>
             <div class="card-stats-mini">
                 <div class="mini-stat">
-                    <span class="mini-stat-label">ATAQUE</span>
+                    <span class="mini-stat-label">ATTACK</span>
                     <span class="mini-stat-val">${atkStat}</span>
                 </div>
                 <div class="mini-stat">
-                    <span class="mini-stat-label">DEFENSA</span>
+                    <span class="mini-stat-label">DEFENSE</span>
                     <span class="mini-stat-val">${defStat}</span>
                 </div>
                 <div class="mini-stat">
-                    <span class="mini-stat-label">ALTURA</span>
+                    <span class="mini-stat-label">HEIGHT</span>
                     <span class="mini-stat-val">${(pokemon.height / 10).toFixed(1)}m</span>
                 </div>
             </div>
             <div class="card-footer-prompt">
-                <span>VER ARCHIVO BIOLÓGICO</span>
+                <span>VIEW BIOLOGICAL FILE</span>
                 <span class="arrow">&raquo;</span>
             </div>
         </div>
     `;
 
-    // Abrir popup con descripción detallada al hacer click
     card.addEventListener('click', () => openPokemonModal(pokemon));
     card.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -286,15 +293,13 @@ function createPokemonCard(pokemon) {
 }
 
 // ==========================================================================
-// FILTRADO Y BÚSQUEDA
+// FILTERING AND SEARCH
 // ==========================================================================
 function getFilteredPokemon() {
     return allLoadedPokemon.filter(pokemon => {
-        // Filtro por tipo
         const matchesType = activeTypeFilter === 'all' || 
             pokemon.types.some(t => t.type.name === activeTypeFilter);
 
-        // Filtro por búsqueda de texto (nombre, id o tipo)
         if (!searchQuery) return matchesType;
 
         const query = searchQuery.toLowerCase().trim();
@@ -302,8 +307,8 @@ function getFilteredPokemon() {
         const matchesId = `#${pokemon.id}`.includes(query) || String(pokemon.id) === query;
         const matchesTypes = pokemon.types.some(t => {
             const rawType = t.type.name.toLowerCase();
-            const esType = (TYPE_TRANSLATIONS[rawType] || '').toLowerCase();
-            return rawType.includes(query) || esType.includes(query);
+            const translatedType = (TYPE_TRANSLATIONS[rawType] || '').toLowerCase();
+            return rawType.includes(query) || translatedType.includes(query);
         });
 
         return matchesType && (matchesName || matchesId || matchesTypes);
@@ -311,10 +316,10 @@ function getFilteredPokemon() {
 }
 
 // ==========================================================================
-// MODAL / POPUP CON DESCRIPCIÓN DETALLADA (ENDPOINTS 2 Y 3)
+// DETAILED MODAL POPUP (ENDPOINTS 2 & 3)
 // ==========================================================================
 async function openPokemonModal(pokemon) {
-    // 1. Llenar datos inmediatos desde Endpoint 1 (/pokemon)
+    // 1. Populate immediate data from Endpoint 1 (/pokemon)
     modalPokemonId.textContent = `#${String(pokemon.id).padStart(3, '0')}`;
     modalPokemonName.textContent = pokemon.name;
     modalHeight.textContent = `${(pokemon.height / 10).toFixed(1)} m`;
@@ -324,19 +329,19 @@ async function openPokemonModal(pokemon) {
         || pokemon.sprites.other?.home?.front_default 
         || pokemon.sprites.front_default;
     modalPokemonImg.src = artworkUrl;
-    modalPokemonImg.alt = `Ilustración oficial de ${pokemon.name}`;
+    modalPokemonImg.alt = `Official artwork of ${pokemon.name}`;
 
     const primaryType = pokemon.types[0]?.type?.name || 'normal';
     modalGlow.style.backgroundColor = `var(--type-${primaryType}, var(--pk-blue))`;
 
-    // Badges de tipos
+    // Type badges
     modalTypes.innerHTML = pokemon.types.map(t => {
         const typeName = t.type.name;
         const translated = TYPE_TRANSLATIONS[typeName] || typeName;
         return `<span class="type-badge type-${typeName}">${translated}</span>`;
     }).join('');
 
-    // Audio rugido (Cry de PokeAPI)
+    // Cry Audio
     const cryUrl = pokemon.cries?.latest || pokemon.cries?.legacy;
     if (cryUrl) {
         pokemonCryAudio.src = cryUrl;
@@ -345,95 +350,111 @@ async function openPokemonModal(pokemon) {
         playCryBtn.classList.add('hidden');
     }
 
-    // Estadísticas base de combate
     renderModalStats(pokemon.stats);
 
-    // Valores provisionales mientras carga Endpoint 2 y 3
-    modalPokemonGenus.textContent = 'Analizando...';
-    modalHabitat.textContent = 'Consultando...';
-    modalCaptureRate.textContent = 'Consultando...';
-    modalDescription.textContent = 'Accediendo al registro biológico de PokeAPI...';
-    modalEvolutionChain.innerHTML = '<div class="evo-loading">Consultando cadena evolutiva en PokeAPI...</div>';
+    // Interim values while loading Endpoints 2 & 3
+    modalPokemonGenus.textContent = 'Analyzing...';
+    modalHabitat.textContent = 'Querying...';
+    modalCaptureRate.textContent = 'Querying...';
+    modalDescription.textContent = 'Accessing PokeAPI biological archive...';
+    modalEvolutionChain.innerHTML = '<div class="evo-loading">Querying evolutionary chain on PokeAPI...</div>';
 
-    // Mostrar modal
+    // Show modal
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
-    // 2. Consultar ENDPOINT 2: /pokemon-species/{id}
+    // 2. Composite API JOIN Step 2: Query /pokemon-species/{id} using primary key pokemon.id
     try {
         const speciesData = await fetchSpeciesData(pokemon.id);
         renderSpeciesDetails(speciesData);
 
-        // 3. Consultar ENDPOINT 3: /evolution-chain/{id}
+        // 3. Composite API JOIN Step 3: Query /evolution-chain/{id} via foreign key speciesData.evolution_chain.url
+        let evoData = null;
         if (speciesData.evolution_chain?.url) {
-            const evoData = await fetchEvolutionChain(speciesData.evolution_chain.url);
+            evoData = await fetchEvolutionChain(speciesData.evolution_chain.url);
             renderEvolutionChain(evoData, pokemon.id);
         } else {
-            modalEvolutionChain.innerHTML = '<div class="evo-loading">Este espécimen no posee evoluciones registradas.</div>';
+            modalEvolutionChain.innerHTML = '<div class="evo-loading">This specimen has no registered evolution line.</div>';
         }
+
+        // Informative logging for API JOIN pattern verification (Inspectable in browser DevTools Console)
+        console.groupCollapsed(`%c[REST API JOIN] Composite Specimen #${pokemon.id} - ${pokemon.name.toUpperCase()}`, 'color: #3b82f6; font-weight: bold;');
+        console.log('%c[Step 1 - Primary Endpoint]: GET /pokemon/%s', 'color: #10b981; font-weight: bold;', pokemon.id, {
+            id: pokemon.id,
+            name: pokemon.name,
+            types: pokemon.types.map(t => t.type.name),
+            stats: pokemon.stats.map(s => ({ stat: s.stat.name, value: s.base_stat }))
+        });
+        console.log('%c[Step 2 - Joined Relation]: GET /pokemon-species/%s (Joined on pokemon.id)', 'color: #f59e0b; font-weight: bold;', pokemon.id, {
+            genus: speciesData.genera?.find(g => g.language.name === 'en')?.genus,
+            habitat: speciesData.habitat?.name,
+            captureRate: speciesData.capture_rate,
+            evolutionChainForeignKey: speciesData.evolution_chain?.url
+        });
+        console.log('%c[Step 3 - Nested Joined Relation]: GET %s (Joined on evolution_chain.url)', 'color: #8b5cf6; font-weight: bold;', speciesData.evolution_chain?.url, evoData);
+        console.groupEnd();
     } catch (error) {
-        console.error('Error al obtener datos detallados de PokeAPI:', error);
-        modalDescription.textContent = 'No fue posible cargar la descripción detallada desde PokeAPI en este momento.';
-        modalEvolutionChain.innerHTML = '<div class="evo-loading">Información evolutiva no disponible.</div>';
+        console.error('Error retrieving detailed PokeAPI composite data:', error);
+        modalDescription.textContent = 'Could not load detailed biological description from PokeAPI at this moment.';
+        modalEvolutionChain.innerHTML = '<div class="evo-loading">Evolutionary information unavailable.</div>';
     }
 }
 
-// Llamada a Endpoint 2 con caché
+// Fetch Endpoint 2 with caching
 async function fetchSpeciesData(pokemonId) {
     if (speciesCache.has(pokemonId)) {
         return speciesCache.get(pokemonId);
     }
     const response = await fetch(`${ENDPOINTS.SPECIES}/${pokemonId}`);
-    if (!response.ok) throw new Error(`Error en species: ${response.status}`);
+    if (!response.ok) throw new Error(`Species error: ${response.status}`);
     const data = await response.json();
     speciesCache.set(pokemonId, data);
     return data;
 }
 
-// Llamada a Endpoint 3 con caché
+// Fetch Endpoint 3 with caching
 async function fetchEvolutionChain(evolutionUrl) {
     if (evolutionCache.has(evolutionUrl)) {
         return evolutionCache.get(evolutionUrl);
     }
     const response = await fetch(evolutionUrl);
-    if (!response.ok) throw new Error(`Error en evolution-chain: ${response.status}`);
+    if (!response.ok) throw new Error(`Evolution-chain error: ${response.status}`);
     const data = await response.json();
     evolutionCache.set(evolutionUrl, data);
     return data;
 }
 
-// Renderizar descripción y lore desde Endpoint 2
+// Render description and lore from Endpoint 2
 function renderSpeciesDetails(species) {
-    // 1. Clasificación / Género (en español)
-    const genusEs = species.genera?.find(g => g.language.name === 'es') 
-        || species.genera?.find(g => g.language.name === 'en');
-    modalPokemonGenus.textContent = genusEs ? genusEs.genus : 'Especie Pokémon';
+    // 1. Classification / Genus (English preferred)
+    const genusEn = species.genera?.find(g => g.language.name === 'en')
+        || species.genera?.find(g => g.language.name === 'es');
+    modalPokemonGenus.textContent = genusEn ? genusEn.genus : 'Pokémon Species';
 
-    // 2. Hábitat
+    // 2. Habitat
     modalHabitat.textContent = species.habitat?.name 
         ? species.habitat.name.toUpperCase() 
-        : 'Desconocido';
+        : 'Unknown';
 
-    // 3. Ratio de captura
+    // 3. Capture Rate
     modalCaptureRate.textContent = `${species.capture_rate || '--'} / 255`;
 
-    // 4. Descripción en Español (flavor_text)
-    const flavorEntry = species.flavor_text_entries?.find(entry => entry.language.name === 'es')
-        || species.flavor_text_entries?.find(entry => entry.language.name === 'en');
+    // 4. Description in English (flavor_text)
+    const flavorEntry = species.flavor_text_entries?.find(entry => entry.language.name === 'en')
+        || species.flavor_text_entries?.find(entry => entry.language.name === 'es');
 
     if (flavorEntry) {
-        // Limpiar saltos de línea molestos y caracteres especiales
         const cleanDescription = flavorEntry.flavor_text
             .replace(/[\n\f\r]/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
         modalDescription.textContent = `"${cleanDescription}"`;
     } else {
-        modalDescription.textContent = 'No se encontró descripción registrada para este espécimen.';
+        modalDescription.textContent = 'No registered biological description for this specimen.';
     }
 }
 
-// Renderizar barras de estadísticas base
+// Render base combat stat bars
 function renderModalStats(stats) {
     modalStatsGrid.innerHTML = '';
     const maxStat = 255;
@@ -457,14 +478,13 @@ function renderModalStats(stats) {
     });
 }
 
-// Renderizar cadena evolutiva desde Endpoint 3
+// Render evolutionary chain from Endpoint 3
 function renderEvolutionChain(evoData, currentPokemonId) {
     const evoStages = [];
     let currentStage = evoData.chain;
 
     while (currentStage) {
         const speciesName = currentStage.species.name;
-        // Extraer id de especie desde la URL (ej: https://pokeapi.co/api/v2/pokemon-species/1/)
         const parts = currentStage.species.url.split('/').filter(Boolean);
         const speciesId = parseInt(parts[parts.length - 1], 10);
 
@@ -479,12 +499,11 @@ function renderEvolutionChain(evoData, currentPokemonId) {
             isCurrent: speciesId === currentPokemonId
         });
 
-        // Tomar la siguiente evolución
         currentStage = currentStage.evolves_to?.[0] || null;
     }
 
     if (evoStages.length <= 1) {
-        modalEvolutionChain.innerHTML = '<div class="evo-loading">Este espécimen no posee evoluciones registradas en su línea.</div>';
+        modalEvolutionChain.innerHTML = '<div class="evo-loading">This specimen has no evolutionary chain.</div>';
         return;
     }
 
@@ -492,19 +511,17 @@ function renderEvolutionChain(evoData, currentPokemonId) {
     evoListContainer.className = 'evo-stages-list';
 
     evoStages.forEach((stage, index) => {
-        // Sprite oficial de la etapa
         const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${stage.id}.png`;
 
         const evoCard = document.createElement('div');
         evoCard.className = `evo-card ${stage.isCurrent ? 'current' : ''}`;
-        evoCard.title = stage.isCurrent ? 'Espécimen actual' : `Ver ${stage.name}`;
+        evoCard.title = stage.isCurrent ? 'Current specimen' : `View ${stage.name}`;
         evoCard.innerHTML = `
             <img src="${spriteUrl}" alt="${stage.name}" class="evo-sprite">
             <span class="evo-name">${stage.name}</span>
             <span class="phys-label">#${String(stage.id).padStart(3, '0')}</span>
         `;
 
-        // Al hacer clic en un miembro de la evolución, abrir sus datos
         if (!stage.isCurrent) {
             evoCard.addEventListener('click', async () => {
                 await loadAndOpenSpecificPokemon(stage.id);
@@ -513,12 +530,11 @@ function renderEvolutionChain(evoData, currentPokemonId) {
 
         evoListContainer.appendChild(evoCard);
 
-        // Flecha conectora si no es el último
         if (index < evoStages.length - 1) {
             const nextStage = evoStages[index + 1];
             const arrow = document.createElement('div');
             arrow.className = 'evo-arrow';
-            const detailText = nextStage.minLevel ? `Nv. ${nextStage.minLevel}` : '➜';
+            const detailText = nextStage.minLevel ? `Lv. ${nextStage.minLevel}` : '➜';
             arrow.innerHTML = `<span>${detailText}</span>`;
             evoListContainer.appendChild(arrow);
         }
@@ -528,22 +544,22 @@ function renderEvolutionChain(evoData, currentPokemonId) {
     modalEvolutionChain.appendChild(evoListContainer);
 }
 
-// Cargar y abrir un Pokémon específico al seleccionarlo desde la cadena evolutiva
+// Load and open a specific Pokémon when selected from evolution chain
 async function loadAndOpenSpecificPokemon(pokemonId) {
     try {
         let pokemon = allLoadedPokemon.find(p => p.id === pokemonId);
         if (!pokemon) {
             const res = await fetch(`${ENDPOINTS.POKEMON}/${pokemonId}`);
-            if (!res.ok) throw new Error('No encontrado');
+            if (!res.ok) throw new Error('Not found');
             pokemon = await res.json();
         }
         openPokemonModal(pokemon);
     } catch (e) {
-        console.error('Error al navegar en la evolución:', e);
+        console.error('Error navigating evolutionary chain:', e);
     }
 }
 
-// Cerrar Modal
+// Close Modal
 function closeModal() {
     modal.classList.add('hidden');
     document.body.style.overflow = '';
@@ -552,27 +568,101 @@ function closeModal() {
 }
 
 // ==========================================================================
+// ==========================================================================
+// DEBOUNCING ENGINE (4-SECOND DELAY)
+// ==========================================================================
+function startDebouncedSearch() {
+    clearDebounceTimers();
+
+    const rawValue = searchInput.value;
+    clearSearchBtn.classList.toggle('hidden', rawValue.length === 0);
+
+    if (rawValue.trim().length === 0) {
+        searchQuery = '';
+        renderPokemonGrid();
+        hideDebounceIndicator();
+        return;
+    }
+
+    showDebounceIndicator(DEBOUNCE_DELAY_MS / 1000);
+    debounceStartTime = Date.now();
+
+    // Update real-time countdown every 100ms
+    debounceIntervalId = setInterval(() => {
+        const elapsed = Date.now() - debounceStartTime;
+        const remaining = Math.max(0, (DEBOUNCE_DELAY_MS - elapsed) / 1000);
+        if (debounceText) {
+            debounceText.textContent = `Debouncing request: ${remaining.toFixed(1)}s`;
+        }
+    }, 100);
+
+    // Trigger search after 4000ms inactivity
+    debounceTimeoutId = setTimeout(() => {
+        clearDebounceTimers();
+        hideDebounceIndicator();
+        executeSearch();
+    }, DEBOUNCE_DELAY_MS);
+}
+
+function clearDebounceTimers() {
+    if (debounceTimeoutId) {
+        clearTimeout(debounceTimeoutId);
+        debounceTimeoutId = null;
+    }
+    if (debounceIntervalId) {
+        clearInterval(debounceIntervalId);
+        debounceIntervalId = null;
+    }
+}
+
+function showDebounceIndicator(initialSeconds) {
+    if (debounceIndicator && debounceText) {
+        debounceText.textContent = `Debouncing request: ${initialSeconds.toFixed(1)}s`;
+        debounceIndicator.classList.remove('hidden');
+    }
+}
+
+function hideDebounceIndicator() {
+    if (debounceIndicator) {
+        debounceIndicator.classList.add('hidden');
+    }
+}
+
+function executeSearch() {
+    searchQuery = searchInput.value.toLowerCase().trim();
+    renderPokemonGrid();
+    if (searchQuery) {
+        handleDirectSearch();
+    }
+}
+
+// ==========================================================================
 // EVENT LISTENERS
 // ==========================================================================
 function setupEventListeners() {
-    // Búsqueda en tiempo real
-    searchInput.addEventListener('input', (e) => {
-        searchQuery = e.target.value;
-        clearSearchBtn.classList.toggle('hidden', searchQuery.length === 0);
-        renderPokemonGrid();
+    // 4-Second Debounced Search on input
+    searchInput.addEventListener('input', startDebouncedSearch);
+
+    // Bypass debouncing on Enter key or explicit search button click
+    searchBtn.addEventListener('click', () => {
+        clearDebounceTimers();
+        hideDebounceIndicator();
+        executeSearch();
     });
 
-    // Búsqueda remota directa si se presiona Enter o botón de buscar y no está cargado
-    searchBtn.addEventListener('click', handleDirectSearch);
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            handleDirectSearch();
+            clearDebounceTimers();
+            hideDebounceIndicator();
+            executeSearch();
         }
     });
 
-    // Botón para limpiar búsqueda
+    // Clear search button immediately cancels debounce and resets
     clearSearchBtn.addEventListener('click', () => {
+        clearDebounceTimers();
+        hideDebounceIndicator();
         searchInput.value = '';
         searchQuery = '';
         clearSearchBtn.classList.add('hidden');
@@ -580,8 +670,10 @@ function setupEventListeners() {
         searchInput.focus();
     });
 
-    // Botón reiniciar búsqueda
+    // Reset search button immediately cancels debounce and resets
     resetSearchBtn.addEventListener('click', () => {
+        clearDebounceTimers();
+        hideDebounceIndicator();
         searchInput.value = '';
         searchQuery = '';
         clearSearchBtn.classList.add('hidden');
@@ -590,7 +682,7 @@ function setupEventListeners() {
         renderPokemonGrid();
     });
 
-    // Filtro de Generación
+    // Generation filter
     genFilter.addEventListener('change', async (e) => {
         currentGen = e.target.value;
         currentOffset = 0;
@@ -598,7 +690,7 @@ function setupEventListeners() {
         await loadPokemonBatch();
     });
 
-    // Filtros Rápidos por Tipo
+    // Quick type filters
     typeFilters.addEventListener('click', (e) => {
         const chip = e.target.closest('.filter-chip');
         if (!chip) return;
@@ -609,20 +701,20 @@ function setupEventListeners() {
         renderPokemonGrid();
     });
 
-    // Botón Cargar Más
+    // Load More Button
     loadMoreBtn.addEventListener('click', () => {
         loadPokemonBatch();
     });
 
-    // Reproducir Rugido
+    // Play Cry Audio
     playCryBtn.addEventListener('click', () => {
         if (pokemonCryAudio.src) {
             pokemonCryAudio.currentTime = 0;
-            pokemonCryAudio.play().catch(err => console.log('Autoplay bloqueado:', err));
+            pokemonCryAudio.play().catch(err => console.log('Autoplay blocked:', err));
         }
     });
 
-    // Cerrar Modal (Botón X, Botón Footer, Backdrop o tecla Escape)
+    // Close Modal triggers
     modalCloseBtn.addEventListener('click', closeModal);
     modalFooterCloseBtn.addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', closeModal);
@@ -640,12 +732,11 @@ function updateActiveTypeChip(selectedType) {
     });
 }
 
-// Búsqueda remota por nombre o ID si no está cargado localmente en el lote
+// Remote direct search by name or ID if not already loaded in local batch
 async function handleDirectSearch() {
     const query = searchInput.value.toLowerCase().trim();
     if (!query) return;
 
-    // Verificar si ya está en memoria
     const alreadyFound = allLoadedPokemon.some(p => 
         p.name.toLowerCase() === query || String(p.id) === query
     );
@@ -661,24 +752,24 @@ async function handleDirectSearch() {
                 openPokemonModal(pokemonData);
             }
         } catch (e) {
-            console.log('No encontrado en PokeAPI remota:', e);
+            console.log('Not found in remote PokeAPI:', e);
         } finally {
             showLoading(false);
         }
     }
 }
 
-// Helpers de interfaz
+// UI Helpers
 function showLoading(show) {
     loadingSpinner.classList.toggle('hidden', !show);
 }
 
 function updateConnectionStatus(online) {
     if (online) {
-        connectionStatus.textContent = 'SISTEMA CONECTADO';
+        connectionStatus.textContent = 'SYSTEM ONLINE';
         connectionStatus.style.color = 'var(--pk-green)';
     } else {
-        connectionStatus.textContent = 'ERROR DE CONEXIÓN POKEAPI';
+        connectionStatus.textContent = 'POKEAPI CONNECTION ERROR';
         connectionStatus.style.color = 'var(--pk-red)';
     }
 }

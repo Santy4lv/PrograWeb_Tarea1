@@ -15,28 +15,28 @@ public class MonsterService {
         this.repository = repository;
     }
 
-    public List<Monster> listarTodos() {
+    public List<Monster> findAll() {
         return repository.findAll();
     }
 
-    public Monster guardar(Monster monster) {
+    public Monster save(Monster monster) {
         return repository.save(monster);
     }
 
-    public Monster actualizar(Long id, Monster datosNuevos) {
-        Monster existente = repository.findById(id).orElse(null);
-        if (existente != null) {
-            existente.setName(datosNuevos.getName());
-            existente.setVirusType(datosNuevos.getVirusType());
-            existente.setGameAppearance(datosNuevos.getGameAppearance());
-            existente.setDangerLevel(datosNuevos.getDangerLevel());
-            existente.setWeakness(datosNuevos.getWeakness());
-            return repository.save(existente);
+    public Monster update(Long id, Monster newDetails) {
+        Monster existing = repository.findById(id).orElse(null);
+        if (existing != null) {
+            existing.setName(newDetails.getName());
+            existing.setVirusType(newDetails.getVirusType());
+            existing.setGameAppearance(newDetails.getGameAppearance());
+            existing.setDangerLevel(newDetails.getDangerLevel());
+            existing.setWeakness(newDetails.getWeakness());
+            return repository.save(existing);
         }
         return null;
     }
 
-    public void eliminar(Long id) {
+    public void delete(Long id) {
         repository.deleteById(id);
     }
 }

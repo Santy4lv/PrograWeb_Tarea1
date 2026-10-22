@@ -1,54 +1,102 @@
-# Programación Web - Tarea 1 (Monorepo)
+# Programación Web - Tarea 1 (Unified Monorepo & Gitflow)
 
-Monorepo estructurado que consolida las dos partes de la **Tarea 1**:
+[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](file:///c:/Users/fslincango/Desktop/Séptimo/Programación%20Web/Tarea%201/README.md)
+[![Gitflow](https://img.shields.io/badge/gitflow-compliant-success.svg)](file:///c:/Users/fslincango/Desktop/Séptimo/Programación%20Web/Tarea%201/README.md)
 
-1. **Parte 1 (`monsters/`)**: Aplicación Fullstack Resident Evil B.O.W. Database (Backend en Java Spring Boot con persistencia y frontend web en HTML5/CSS3/JavaScript).
-2. **Parte 2 (`pokeapi/`)**: Pokédex interactiva OS que consume y coordina 3 endpoints REST oficiales de PokeAPI, aplicando CSS Grid responsivo, diseño holográfico y modal de lore biológico.
+Enterprise-grade monorepo consolidating both parts of **Web Programming Homework 1**, strictly adhering to the **Gitflow Branching Workflow**:
+
+1. **Part 1 (`monsters/`)**: Fullstack Resident Evil B.O.W. Database (Java Spring Boot Backend with JPA/Hibernate + Pure Vanilla Web Frontend).
+2. **Part 2 (`pokeapi/`)**: Interactive Pokédex OS consuming and coordinating 3 official PokeAPI REST endpoints via a composite relational JOIN pattern, responsive CSS Grid, live cry audio, and a 4-second Debouncing Engine.
 
 ---
 
-## 📁 Estructura del Proyecto
+## 🌿 Gitflow Workflow Architecture
+
+The repository manages features, integrations, and releases using standard Gitflow:
+
+```mermaid
+gitGraph
+   commit id: "Initial Commit"
+   commit id: "monsters CRUD"
+   commit id: "monorepo restructure"
+   branch dev
+   checkout dev
+   branch feature/translate-to-english
+   commit id: "feat(i18n): english codebase"
+   checkout dev
+   merge feature/translate-to-english id: "PR #1: Translate to English"
+   branch feature/search-debouncing
+   commit id: "feat(pokeapi): 4s debouncing"
+   checkout dev
+   merge feature/search-debouncing id: "PR #2: Search Debouncing"
+   branch feature/api-join-chaining
+   commit id: "feat(pokeapi): composite JOIN"
+   checkout dev
+   merge feature/api-join-chaining id: "PR #3: API JOIN Pattern"
+   branch release/v1.0.0
+   commit id: "release: v1.0.0 prep"
+   checkout main
+   merge release/v1.0.0 id: "Release v1.0.0 (Tagged)"
+   checkout dev
+   merge release/v1.0.0 id: "Sync dev"
+```
+
+### Pull Request (PR) Registry:
+
+| PR ID | Branch Name | Target | Summary of Changes | Impacted Files |
+| :--- | :--- | :--- | :--- | :--- |
+| **PR #1** | `feature/translate-to-english` | `dev` | Full translation of backend Java methods, frontend JS logic, UI labels and comments to English. | `MonsterController.java`, `MonsterService.java`, `monsters index.html & script.js`, `pokeapi index.html & script.js` |
+| **PR #2** | `feature/search-debouncing` | `dev` | Implementation of 4000ms (4.0s) delay debouncing engine on search input with live visual countdown badge. | `pokeapi/index.html`, `pokeapi/resources/css/styles.css`, `pokeapi/resources/js/script.js` |
+| **PR #3** | `feature/api-join-chaining` | `dev` | Explicit documentation and DevTools console logging of the composite REST API JOIN pattern. | `pokeapi/README.md`, `pokeapi/resources/js/script.js` |
+
+---
+
+## 📁 Repository Directory Structure
 
 ```text
 Tarea 1/
-├── monsters/                             # PARTE 1: Backend Spring Boot + Frontend
+├── monsters/                             # PART 1: Spring Boot Backend + Frontend
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/com/re/monsters/    # Controladores, Servicios, Modelos y Repositorios
+│   │   │   ├── java/com/re/monsters/    # Controllers, Services, Models, Repositories
 │   │   │   └── resources/
 │   │   │       ├── application.properties.example
 │   │   │       ├── init.sql
-│   │   │       └── static/              # Frontend web de Monsters
+│   │   │       └── static/              # Frontend web assets
 │   │   │           ├── index.html
-│   │   │           ├── css/styles.css   # Estilos organizados en recursos
-│   │   │           └── js/script.js     # Lógica organizada en recursos
+│   │   │           ├── css/styles.css   # Modular CSS resources
+│   │   │           └── js/script.js     # Vanilla JS CRUD integration
 │   │   └── test/
 │   ├── pom.xml
 │   └── mvnw / mvnw.cmd
 │
-├── pokeapi/                              # PARTE 2: Pokédex Frontend Vanilla
-│   ├── index.html                        # Entrada principal
-│   ├── resources/                        # Recursos web estandarizados
+├── pokeapi/                              # PART 2: Vanilla Pokédex Application
+│   ├── index.html                        # Main Pokédex user interface
+│   ├── resources/                        # Standardized static resources
 │   │   ├── css/
-│   │   │   └── styles.css                # Estilos y Media Queries responsivas
+│   │   │   └── styles.css                # Dark holographic cyber-theme & CSS Grid
 │   │   └── js/
-│   │       └── script.js                 # Motor de consumo de PokeAPI con Debouncing & JOIN
-│   └── README.md                         # Documentación técnica de PokeAPI
+│   │       └── script.js                 # 3-Endpoint API engine, 4s debounce & JOIN logic
+│   └── README.md                         # Detailed PokeAPI technical manual
 │
-├── .gitignore                            # Exclusiones de build, IDEs y temporales
-└── README.md                             # Este documento
+├── .gitignore                            # Exclusions for IDEs, build artifacts & binaries
+└── README.md                             # Global Monorepo & Gitflow documentation
 ```
 
 ---
 
-## 🚀 Ejecución
+## 🚀 Running the Projects
 
-### Parte 1 (Monsters)
-1. Navega a `monsters/`.
-2. Configura tu base de datos con `src/main/resources/init.sql` y `application.properties`.
-3. Ejecuta `./mvnw spring-boot:run`.
-4. Abre `http://localhost:8080` en el navegador.
+### Part 1: Monsters (Spring Boot + Static Web)
+1. Open a terminal in `monsters/`.
+2. Configure your database using `src/main/resources/init.sql` and `application.properties`.
+3. Run the development server:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+4. Access the web interface at `http://localhost:8080`.
 
-### Parte 2 (PokeAPI)
-1. Navega a `pokeapi/`.
-2. Abre `index.html` en cualquier navegador web o mediante una extensión como Live Server.
+### Part 2: PokeAPI (Interactive Pokédex)
+1. Open a terminal or file explorer in `pokeapi/`.
+2. Open `index.html` directly in any modern browser (Chrome, Edge, Firefox, Brave).
+3. Open the Developer Tools console (`F12`) to inspect the real-time composite REST API JOIN logs.
