@@ -1,6 +1,6 @@
 services:
   # ------------------------------------------------------------------
-  # Base de datos PostgreSQL
+  # PostgreSQL Database Service
   # ------------------------------------------------------------------
   db:
     image: postgres:15-alpine
@@ -11,15 +11,15 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: leon405049
     volumes:
-      # Persistencia de los datos para que no se borren si el contenedor se reinicia
+      # Data persistence across container restarts
       - postgres_data:/var/lib/postgresql/data
-      # Ejecuta automáticamente el script de creación y registros iniciales
+      # Automatically execute initial database schema and seed script
       - ./monsters/src/main/resources/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - app-network
 
   # ------------------------------------------------------------------
-  # Backend Spring Boot (Monsters)
+  # Spring Boot Backend Service (Monsters)
   # ------------------------------------------------------------------
   monsters:
     build:
@@ -30,7 +30,7 @@ services:
     depends_on:
       - db
     environment:
-      # Conecta directamente al servicio 'db' en lugar de localhost
+      # Connect directly to the 'db' service instead of localhost
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/resident_evil_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: leon405049
@@ -41,7 +41,7 @@ services:
       - app-network
 
   # ------------------------------------------------------------------
-  # Frontend PokeAPI (Nginx)
+  # Nginx Static Frontend Service (PokeAPI)
   # ------------------------------------------------------------------
   pokeapi:
     build:
@@ -60,3 +60,4 @@ volumes:
 networks:
   app-network:
     driver: bridge
+

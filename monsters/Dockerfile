@@ -1,34 +1,35 @@
 # ----------------------------------------------------
-# Etapa 1: Compilación y empaquetado del JAR
+# Stage 1: Build and package JAR
 # ----------------------------------------------------
 FROM eclipse-temurin:27-jdk AS builder
 WORKDIR /app
 
-# Copiar el wrapper de Maven y el descriptor del proyecto
+# Copy Maven wrapper and project descriptor
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 
-# Dar permisos de ejecución a mvnw (crucial para entornos Linux/Docker)
+# Grant execution permissions to mvnw (required for Linux/Docker environments)
 RUN chmod +x mvnw
 
-# Descargar dependencias para aprovechar la caché de capas de Docker
+# Download dependencies to leverage Docker layer caching
 RUN ./mvnw dependency:go-offline -B || true
 
-# Copiar el código fuente y construir el archivo .jar
+# Copy source code and build production .jar artifact
 COPY src/ src/
 RUN ./mvnw clean package -DskipTests
 
 # ----------------------------------------------------
-# Etapa 2: Entorno de ejecución ligero
+# Stage 2: Lightweight runtime environment
 # ----------------------------------------------------
 FROM eclipse-temurin:27-jre
 WORKDIR /app
 
-# Copiar el JAR generado desde la etapa de compilación
+# Copy compiled JAR artifact from builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Exponer el puerto donde corre Spring Boot
+# Expose default Spring Boot application port
 EXPOSE 8080
 
-# Ajuste de memoria para que el recolector de basura respete los límites de AWS EC2
+# Memory tuning ensuring garbage collector respects AWS EC2 resource constraints
 ENTRYPOINT ["java", "-XX:+UseG1GC", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+
