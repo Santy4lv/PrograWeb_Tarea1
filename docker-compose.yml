@@ -1,0 +1,63 @@
+services:
+  # ------------------------------------------------------------------
+  # PostgreSQL Database Service
+  # ------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: resident_evil_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: resident_evil_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: leon405049
+    volumes:
+      # Data persistence across container restarts
+      - postgres_data:/var/lib/postgresql/data
+      # Automatically execute initial database schema and seed script
+      - ./monsters/src/main/resources/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - app-network
+
+  # ------------------------------------------------------------------
+  # Spring Boot Backend Service (Monsters)
+  # ------------------------------------------------------------------
+  monsters:
+    build:
+      context: ./monsters
+      dockerfile: Dockerfile
+    container_name: monsters_app
+    restart: always
+    depends_on:
+      - db
+    environment:
+      # Connect directly to the 'db' service instead of localhost
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/resident_evil_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: leon405049
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  # ------------------------------------------------------------------
+  # Nginx Static Frontend Service (PokeAPI)
+  # ------------------------------------------------------------------
+  pokeapi:
+    build:
+      context: ./pokeapi
+      dockerfile: Dockerfile
+    container_name: pokedex_app
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
+

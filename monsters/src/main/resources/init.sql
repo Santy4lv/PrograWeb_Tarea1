@@ -8,7 +8,7 @@ CREATE TABLE monsters (
 );
 
 INSERT INTO monsters (name, virus_type, game_appearance, danger_level, weakness) VALUES
-('Zombie', 'T-Virus', 'Resident Evil 1 & 2', 3, 'Fuego / Cabeza'),
-('Licker', 'T-Virus', 'Resident Evil 2', 7, 'Ruido / Ceguera'),
-('Nemesis T-Type', 'NE-Alpha + T-Virus', 'Resident Evil 3', 10, 'Lanzacohetes / Acido'),
-('Ganado', 'Las Plagas', 'Resident Evil 4', 5, 'Granada de luz');
+('Zombie', 'T-Virus', 'Resident Evil 1 & 2', 3, 'Fire / Headshots'),
+('Licker', 'T-Virus', 'Resident Evil 2', 7, 'Sound Sensitivity / Blindness'),
+('Nemesis T-Type', 'NE-Alpha + T-Virus', 'Resident Evil 3', 10, 'Rocket Launcher / Acid'),
+('Ganado', 'Las Plagas', 'Resident Evil 4', 5, 'Flash Grenade');
