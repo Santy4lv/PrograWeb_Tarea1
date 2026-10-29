@@ -24,3 +24,12 @@ Thumbs.db
 
 ### Environment & Secrets ###
 **/application.properties
+
+### Node / Turborepo / pnpm ###
+node_modules/
+**/node_modules/
+.turbo/
+**/.turbo/
+dist/
+coverage/
+.pnpm-debug.log*

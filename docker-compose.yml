@@ -1,5 +1,23 @@
 services:
   # ------------------------------------------------------------------
+  # API Gateway Reverse Proxy Service (Nginx) - Single Entrypoint
+  # ------------------------------------------------------------------
+  gateway:
+    image: nginx:alpine
+    container_name: api_gateway
+    restart: always
+    depends_on:
+      - monsters
+      - pokeapi
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      - app-network
+
+  # ------------------------------------------------------------------
   # PostgreSQL Database Service
   # ------------------------------------------------------------------
   db:
@@ -14,43 +32,42 @@ services:
       # Data persistence across container restarts
       - postgres_data:/var/lib/postgresql/data
       # Automatically execute initial database schema and seed script
-      - ./monsters/src/main/resources/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./apps/monsters/src/main/resources/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - app-network
 
   # ------------------------------------------------------------------
-  # Spring Boot Backend Service (Monsters)
+  # Spring Boot Backend Service (Monsters) - Internal Upstream
   # ------------------------------------------------------------------
   monsters:
     build:
-      context: ./monsters
+      context: ./apps/monsters
       dockerfile: Dockerfile
     container_name: monsters_app
     restart: always
     depends_on:
       - db
     environment:
-      # Connect directly to the 'db' service instead of localhost
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/resident_evil_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: leon405049
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     networks:
       - app-network
 
   # ------------------------------------------------------------------
-  # Nginx Static Frontend Service (PokeAPI)
+  # Nginx Static Frontend Service (PokeAPI) - Internal Upstream
   # ------------------------------------------------------------------
   pokeapi:
     build:
-      context: ./pokeapi
+      context: ./apps/pokeapi
       dockerfile: Dockerfile
     container_name: pokedex_app
     restart: always
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     networks:
       - app-network
 
@@ -60,4 +77,3 @@ volumes:
 networks:
   app-network:
     driver: bridge
-
