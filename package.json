@@ -1,0 +1,25 @@
+{
+  "name": "prograweb-tarea1-e2e-mcp",
+  "version": "1.0.0",
+  "description": "Playwright E2E testing suite and agentic MCP automation server",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
+    "mcp:start": "tsx mcp/server.ts",
+    "test:k6:pokeapi": "k6 run tests/k6/pokeapi-load-test.js",
+    "test:k6:monsters": "k6 run tests/k6/monsters-load-test.js",
+    "test:k6": "npm run test:k6:pokeapi && npm run test:k6:monsters"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.5.0",
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^22.10.2",
+    "playwright": "^1.49.1",
+    "serve": "^14.2.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "zod": "^3.24.1"
+  }
+}
+
