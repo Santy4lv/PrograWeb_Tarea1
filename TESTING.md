@@ -69,3 +69,31 @@ Add the server configuration to your AI agent's MCP settings:
 * `get_text`: Extract inner text from an element.
 * `screenshot`: Capture a screenshot of the active page.
 
+---
+
+## 4. Load & Stress Testing with Grafana K6
+
+Performance tests validate the AWS Application Load Balancers across concurrent Virtual Users (VUs):
+
+```bash
+# Test PokeAPI ALB (static frontend + CSS Grid)
+npm run test:k6:pokeapi
+
+# Test Monsters ALB (Umbrella B.O.W. frontend + REST API /api/monsters)
+npm run test:k6:monsters
+
+# Run both load tests sequentially
+npm run test:k6
+```
+
+### Custom Target URL
+To target a different environment or local instance:
+```bash
+TARGET_URL=http://localhost:80 k6 run tests/k6/pokeapi-load-test.js
+```
+
+### Quality Thresholds
+* **p95 Latency:** < 500ms (PokeAPI) / < 800ms (Monsters API)
+* **HTTP Failure Rate:** < 1.0% (Zero dropped requests under peak load)
+
+

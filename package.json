@@ -6,7 +6,10 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
-    "mcp:start": "tsx mcp/server.ts"
+    "mcp:start": "tsx mcp/server.ts",
+    "test:k6:pokeapi": "k6 run tests/k6/pokeapi-load-test.js",
+    "test:k6:monsters": "k6 run tests/k6/monsters-load-test.js",
+    "test:k6": "npm run test:k6:pokeapi && npm run test:k6:monsters"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.5.0",
